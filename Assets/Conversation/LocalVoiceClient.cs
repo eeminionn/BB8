@@ -29,8 +29,10 @@ public sealed class LocalVoiceClient : MonoBehaviour
     public void Retry(){ if(!Busy && !Recording) StartCoroutine(Connect()); }
     IEnumerator Connect(){
         Ready=false; Busy=true; Status="Preparando voz local…";
+        var installed=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library/Application Support/BB8Voice");
+        if(Directory.Exists(Path.Combine(installed,".local-voice"))) project=installed;
         var root=new DirectoryInfo(Application.dataPath);
-        for(int i=0;i<6 && root!=null;i++,root=root.Parent){
+        for(int i=0;i<6 && root!=null && project==null;i++,root=root.Parent){
             if(Directory.Exists(Path.Combine(root.FullName,".local-voice"))) {project=root.FullName; break;}
             if(Directory.Exists(Path.Combine(root.FullName,"BB8/.local-voice"))) {project=Path.Combine(root.FullName,"BB8"); break;}
         }
@@ -48,7 +50,9 @@ public sealed class LocalVoiceClient : MonoBehaviour
                     launched=true;
                     try{
                         var info=new System.Diagnostics.ProcessStartInfo(Path.Combine(project,".local-voice/venv/bin/python"));
-                        info.Arguments="\""+Path.Combine(project,"Assets/StreamingAssets/VoiceService/service.py")+"\"";
+                        var script=Path.Combine(project,"VoiceService/service.py");
+                        if(!File.Exists(script)) script=Path.Combine(project,"Assets/StreamingAssets/VoiceService/service.py");
+                        info.Arguments="\""+script+"\"";
                         info.WorkingDirectory=project;info.UseShellExecute=false;info.CreateNoWindow=true;
                         info.EnvironmentVariables["BB8_PROJECT"]=project;
                         service=System.Diagnostics.Process.Start(info);
