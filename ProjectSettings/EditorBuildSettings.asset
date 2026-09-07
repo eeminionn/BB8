@@ -6,6 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/demo.unity
-    guid: fb35433c1eb226d4ba05171f2a8c8ace
+    path: Assets/scrapyard.unity
+    guid: 455dce1e699014d73bb0545608b51c7d
   m_configObjects: {}

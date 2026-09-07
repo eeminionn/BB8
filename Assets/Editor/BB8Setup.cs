@@ -7,8 +7,10 @@ using UnityEditor.Build.Reporting;
 
 public static class BB8Setup
 {
+    public const string ScenePath = "Assets/scrapyard.unity";
+
     [MenuItem("BB8/Open Demo")]
-    public static void OpenDemo() => EditorSceneManager.OpenScene("Assets/demo.unity");
+    public static void OpenDemo() => EditorSceneManager.OpenScene(System.IO.File.Exists(ScenePath) ? ScenePath : "Assets/demo.unity");
 
     public static void Prepare()
     {
@@ -17,7 +19,7 @@ public static class BB8Setup
             if (!AssetDatabase.LoadAllAssetsAtPath(path).OfType<Mesh>().Any())
                 AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
         OpenDemo();
-        EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene("Assets/demo.unity", true) };
+        EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
         PlayerSettings.productName = "BB8";
         PlayerSettings.companyName = "eeminionn";
         PlayerSettings.defaultScreenWidth = 1280;
@@ -25,15 +27,15 @@ public static class BB8Setup
         PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
         PlayerSettings.runInBackground = false;
         PlayerSettings.SetArchitecture(UnityEditor.Build.NamedBuildTarget.Standalone, 1);
-        var controllers = UnityEngine.Object.FindObjectsByType<BbRigidbodyController>(FindObjectsSortMode.None);
+        var controllers = UnityEngine.Object.FindObjectsByType<BbRigidbodyController>();
         if (controllers.Length != 1 || controllers[0].Head == null || controllers[0].Camera == null)
             throw new Exception("Demo controller or references are missing.");
-        foreach (var mf in UnityEngine.Object.FindObjectsByType<MeshFilter>(FindObjectsSortMode.None))
+        foreach (var mf in UnityEngine.Object.FindObjectsByType<MeshFilter>())
         {
             if (mf.sharedMesh == null) throw new Exception("Missing mesh: " + mf.name);
             Debug.Log("BB8_MESH " + mf.name + " mesh=" + mf.sharedMesh.name);
         }
-        foreach (var rb in UnityEngine.Object.FindObjectsByType<Rigidbody>(FindObjectsSortMode.None))
+        foreach (var rb in UnityEngine.Object.FindObjectsByType<Rigidbody>())
             Debug.Log("BB8_BODY " + rb.name + " pos=" + rb.position);
         if (controllers[0].GetComponent<BB8DemoHelp>() == null)
             controllers[0].gameObject.AddComponent<BB8DemoHelp>();
@@ -61,7 +63,7 @@ public static class BB8Setup
     {
         Prepare();
         var result = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
-            scenes = new[] { "Assets/demo.unity" },
+            scenes = new[] { ScenePath },
             locationPathName = "../BB8.app",
             target = BuildTarget.StandaloneOSX,
             options = BuildOptions.None
