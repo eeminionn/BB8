@@ -13,10 +13,24 @@ MonoBehaviour:
   m_Name: celebrate
   m_EditorClassIdentifier: Assembly-CSharp::SocialReaction
   Id: celebrate
-  Sound: {fileID: 8300000, guid: 716667ca4c474426795cc4f8c402b646, type: 3}
+  Sound: {fileID: 8300000, guid: d0e1f3cd029df4d89b79447205649a19, type: 3}
   Duration: 3
   HeadTilt: 15
   HeadSpeed: 7
   Movement: 0
-  Pitch: 1.15
+  Pitch: 1.04
   Bounce: 1
+  IntensitySounds:
+  - {fileID: 8300000, guid: d0e1f3cd029df4d89b79447205649a19, type: 3}
+  - {fileID: 8300000, guid: 0f4634f48cfaf4607915bcc7528b63d5, type: 3}
+  - {fileID: 8300000, guid: 8d96aa877c15947648f47a696663705c, type: 3}
+  DroidWords:
+  - beep-bwee!
+  - beep-beep, bwoop!
+  - bwee-beep-boop! beep-bwee!
+  Feelings:
+  - Contento
+  - Feliz
+  - "Euf\xF3rico"
+  Travel: {x: 0.65, y: 1.8, z: 3.5}
+  Durations: {x: 2.6, y: 3.8, z: 5.2}

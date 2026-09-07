@@ -7206,6 +7206,7 @@ MonoBehaviour:
   FirstPerson: 0
   SuspendInput: 0
   EyeHeight: 1
+  AutoFollow: 1
 --- !u!81 &591544027
 AudioListener:
   m_ObjectHideFlags: 0
@@ -23643,6 +23644,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BB8Personality
   SocialHeadPose: {x: 0, y: 0, z: 0}
+  SocialSpeaking: 0
+  SocialAntenna: 0
   HeadVisual: {fileID: 1996516545}
   Antennas:
   - {fileID: 1722521688}

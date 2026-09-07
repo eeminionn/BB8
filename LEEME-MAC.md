@@ -14,12 +14,12 @@ La escena principal es `Assets/scrapyard.unity`. La antigua pista de prueba se c
 
 | Entrada | Acción |
 | --- | --- |
-| WASD | Rodar |
-| Mouse | Orientar la cámara |
+| W / S | Avanzar / retroceder |
+| A / D | Girar; la cámara acompaña el giro |
+| Mouse | Mirar alrededor; al desplazarte la cámara vuelve suavemente al frente |
 | Rueda | Acercar o alejar |
 | Espacio | Saltar; pausa de 0,65 segundos entre saltos |
 | Shift + dirección | Turbo, hasta 1,4 segundos por ráfaga |
-| R | Volver al punto inicial y reiniciar la escena |
 
 El turbo consume aproximadamente un 70 % de batería por ráfaga completa. Suelta Shift antes de iniciar otra; hay una pausa de 0,35 segundos. Hace falta al menos un 12 % de carga para arrancar. Las seis celdas azules recargan un 55 %, sin superar el 100 %, y reaparecen tras 16 segundos. Con batería llena no se consumen.
 
@@ -44,22 +44,26 @@ Blender 5.2.1 está instalado en `/Applications/Blender.app` para importar los m
 
 Proyecto original: https://github.com/mattolenik/BB8
 Fork: https://github.com/eeminionn/BB8
-Rama de esta versión: `scrapyard-experience`.
+Rama de esta versión: `local-conversation`.
 
 ## Conversación local y Minion
 
-La escena comienza controlando al Minion. **Tab** alterna el control y la cámara entre Minion y BB-8. **V** alterna primera / tercera persona. Ambos se mueven con WASD y saltan con espacio; Shift mantiene el turbo de BB-8.
+La escena comienza controlando al Minion. **Tab** alterna el control y la cámara entre Minion y BB-8. **V** alterna primera / tercera persona. Ambos avanzan con W, retroceden con S, giran con A/D y saltan con espacio; Shift mantiene el turbo de BB-8. El giro funciona también sin avanzar. La cámara sigue la dirección del personaje, sin usar la rotación de la esfera de BB-8; después de mirar con el mouse deja una pausa breve antes de acompañar otra vez el movimiento.
 
 Mantén **E**, habla en español y suelta para que BB-8 reaccione. La primera vez, permite el micrófono en el diálogo de macOS; si soltaste E durante ese diálogo, vuelve a mantenerlo. Máximo 15 segundos por intervención. El sonido de la escena se silencia durante la grabación para evitar que el propio droide se transcriba. Cambiar de aplicación cancela la grabación.
 
-**T** abre una entrada de texto; Enter envía y Escape cancela. **F3** muestra la interpretación estimada, permite cambiar de micrófono y probar dos gestos. Esta información está oculta normalmente para no condicionar al participante.
+**T** abre una entrada de texto; Enter envía y Escape cancela. **F3** muestra la interpretación estimada, permite cambiar de micrófono y comparar directamente Alegría 1, 2 y 3. El diagnóstico está oculto normalmente.
 
 El servicio de voz se inicia automáticamente. El motor está instalado en `~/Library/Application Support/BB8Voice` (aproximadamente 3,9 GB entre modelos y Python); `.local-voice` en el proyecto es un enlace a esa instalación. Así la voz no necesita acceder a Documentos al iniciar. Para actualizar el servicio tras editar `service.py`, ejecuta `.local-voice/venv/bin/python Assets/StreamingAssets/VoiceService/install.py`. El primer inicio puede tardar; espera a “Mantén E para hablar”. Todo funciona localmente una vez descargado: no hay suscripciones, claves externas ni grabaciones enviadas a Internet. No se guardan audio ni transcripciones; las últimas tres frases viven temporalmente en memoria para contexto y el registro técnico no incluye su contenido. El proceso que inicia la aplicación se cierra al salir.
 
 La clasificación interpreta el significado del texto transcrito, **no el tono de voz ni el estado psicológico real**. Separa emoción expresada (`happy`, `sad`, `angry`, `fear`, `neutral`, `uncertain`) de actitud (`friendly`, `hostile`, `seeking_comfort`, `neutral`). No es una medición validada: las etiquetas e intensidad son estimaciones del modelo y pueden equivocarse, especialmente con ironía, ruido o transcripción incorrecta.
 
-Los seis perfiles de movimiento y audio están en `Assets/Conversation/Reactions`: alegría con pequeño salto, consuelo con acercamiento suave, retirada ante hostilidad, cautela, atención y confusión. Una vez seleccionada una reacción, su secuencia es predefinida; la intensidad modula amplitud. La geometría puede limitar desplazamientos para evitar bordes y obstáculos. La reacción toma temporalmente el control de BB-8, incluso si lo estás manejando. El Minion sigue disponible para desplazarse.
+Los seis perfiles de movimiento y audio están en `Assets/Conversation/Reactions`: alegría con recorrido lateral y saltos, consuelo con acercamiento curvo, retirada con zigzag ante hostilidad, cautela con temblores, atención con asentimientos y confusión con inclinaciones alternadas. Cada intensidad selecciona un sonido, una duración y una distancia distintos (2,6 / 3,8 / 5,2 segundos). La cabeza combina inclinación, asentimientos y giros; las antenas acompañan el gesto. La geometría limita desplazamientos ante bordes, obstáculos y proximidad al Minion. La reacción toma temporalmente el control de BB-8; el Minion sigue disponible para desplazarse.
 
-Para reconstruir: **BB8 > Build Mac App**. Para verificar: **BB8 > Verify Conversation**, **BB8 > Verify Scrapyard**, y `.local-voice/venv/bin/python Assets/StreamingAssets/VoiceService/verify.py` con el servicio activo. Informes en `Logs/`. **Install Conversation** reinstala los objetos de conversación de la escena; conserva perfiles existentes.
+El popup muestra la voz escrita como onomatopeya (`beep-boop`, etc.), una palabra para el estado ficticio de BB-8 y una barra de preferencia con verde a la izquierda y rojo a la derecha. Las onomatopeyas son subtítulos expresivos asignados a cada secuencia, no una traducción real de los sonidos. La barra comienza en el centro: la alegría y las interacciones amistosas la acercan al verde; la hostilidad y la alarma al rojo. Pedir consuelo puede aumentar la cercanía aunque BB-8 se muestre preocupado. El valor se acumula durante la sesión y vuelve al centro al reiniciar. El popup y la frase transcrita desaparecen tres segundos después del gesto, con un fundido final.
+
+Hay 18 grabaciones normalizadas de `eeminionn/bb8-sounds`. Las asociaciones emocionales son provisionales de diseño; el fork no las traía clasificadas. `Assets/Conversation/Audio/sources.json` conserva la procedencia de cada variante. `BB8 > Upgrade Expressions` restablece los valores de esta versión, mientras que editar los perfiles directamente permite personalizarlos.
+
+Para reconstruir: **BB8 > Build Mac App**. Para verificar: **BB8 > Verify Expressions**, **BB8 > Verify Conversation**, **BB8 > Verify Scrapyard**, y `.local-voice/venv/bin/python Assets/StreamingAssets/VoiceService/verify.py` con el servicio activo. Informes en `Logs/`. **Install Conversation** reinstala los objetos de conversación de la escena; conserva perfiles existentes.
 
 Créditos del Minion y modelos locales: `THIRD-PARTY.md`.

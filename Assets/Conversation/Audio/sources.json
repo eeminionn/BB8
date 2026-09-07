@@ -1,0 +1,150 @@
+{
+  "repository": "https://github.com/eeminionn/bb8-sounds",
+  "classification": "Provisional design associations based on duration, pitch contour and gesture; not publisher-provided emotional labels.",
+  "clips": [
+    {
+      "file": "celebrate-1.wav",
+      "source": "bb8-04.mp3",
+      "reaction": "celebrate",
+      "intensity": 1,
+      "duration": 0.818,
+      "gain": 4.765
+    },
+    {
+      "file": "celebrate-2.wav",
+      "source": "bb8-06.mp3",
+      "reaction": "celebrate",
+      "intensity": 2,
+      "duration": 1.106,
+      "gain": 8.127
+    },
+    {
+      "file": "celebrate-3.wav",
+      "source": "bb8-17.mp3",
+      "reaction": "celebrate",
+      "intensity": 3,
+      "duration": 1.892,
+      "gain": 5.517
+    },
+    {
+      "file": "comfort-1.wav",
+      "source": "bb8-07.mp3",
+      "reaction": "comfort",
+      "intensity": 1,
+      "duration": 0.894,
+      "gain": 5.055
+    },
+    {
+      "file": "comfort-2.wav",
+      "source": "bb8-21.mp3",
+      "reaction": "comfort",
+      "intensity": 2,
+      "duration": 2.322,
+      "gain": 4.92
+    },
+    {
+      "file": "comfort-3.wav",
+      "source": "bb8-24.mp3",
+      "reaction": "comfort",
+      "intensity": 3,
+      "duration": 2.159,
+      "gain": 4.154
+    },
+    {
+      "file": "retreat-1.wav",
+      "source": "bb8-03.mp3",
+      "reaction": "retreat",
+      "intensity": 1,
+      "duration": 0.84,
+      "gain": 4.379
+    },
+    {
+      "file": "retreat-2.wav",
+      "source": "bb8-11.mp3",
+      "reaction": "retreat",
+      "intensity": 2,
+      "duration": 1.451,
+      "gain": 5.224
+    },
+    {
+      "file": "retreat-3.wav",
+      "source": "bb8-26.mp3",
+      "reaction": "retreat",
+      "intensity": 3,
+      "duration": 1.718,
+      "gain": 3.512
+    },
+    {
+      "file": "cautious-1.wav",
+      "source": "bb8-25.mp3",
+      "reaction": "cautious",
+      "intensity": 1,
+      "duration": 1.184,
+      "gain": 3.362
+    },
+    {
+      "file": "cautious-2.wav",
+      "source": "bb8-29.mp3",
+      "reaction": "cautious",
+      "intensity": 2,
+      "duration": 1.289,
+      "gain": 3.508
+    },
+    {
+      "file": "cautious-3.wav",
+      "source": "bb8-13.mp3",
+      "reaction": "cautious",
+      "intensity": 3,
+      "duration": 2.603,
+      "gain": 3.868
+    },
+    {
+      "file": "attentive-1.wav",
+      "source": "bb2-02.mp3",
+      "reaction": "attentive",
+      "intensity": 1,
+      "duration": 0.509,
+      "gain": 4.598
+    },
+    {
+      "file": "attentive-2.wav",
+      "source": "bb8-19.mp3",
+      "reaction": "attentive",
+      "intensity": 2,
+      "duration": 1.277,
+      "gain": 3.721
+    },
+    {
+      "file": "attentive-3.wav",
+      "source": "bb8-22.mp3",
+      "reaction": "attentive",
+      "intensity": 3,
+      "duration": 2.392,
+      "gain": 7.027
+    },
+    {
+      "file": "puzzled-1.wav",
+      "source": "bb8-20.mp3",
+      "reaction": "puzzled",
+      "intensity": 1,
+      "duration": 0.836,
+      "gain": 7.16
+    },
+    {
+      "file": "puzzled-2.wav",
+      "source": "bb8-15.mp3",
+      "reaction": "puzzled",
+      "intensity": 2,
+      "duration": 1.881,
+      "gain": 4.408
+    },
+    {
+      "file": "puzzled-3.wav",
+      "source": "bb8-18.mp3",
+      "reaction": "puzzled",
+      "intensity": 3,
+      "duration": 1.555,
+      "gain": 5.727
+    }
+  ]
+}

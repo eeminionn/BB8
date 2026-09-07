@@ -13,10 +13,24 @@ MonoBehaviour:
   m_Name: comfort
   m_EditorClassIdentifier: Assembly-CSharp::SocialReaction
   Id: comfort
-  Sound: {fileID: 8300000, guid: 83eb3f8e2417b435188fb0ee3da82a54, type: 3}
+  Sound: {fileID: 8300000, guid: e19cebcd032fe4a468ec23bd96cf4436, type: 3}
   Duration: 3.8
   HeadTilt: 6
   HeadSpeed: 1.8
   Movement: 0.14
-  Pitch: 0.8
+  Pitch: 0.95
   Bounce: 0
+  IntensitySounds:
+  - {fileID: 8300000, guid: e19cebcd032fe4a468ec23bd96cf4436, type: 3}
+  - {fileID: 8300000, guid: 11bba8ff52ddd42ce9796df0e0194ab5, type: 3}
+  - {fileID: 8300000, guid: fcc53e36bc7854ced941201021490433, type: 3}
+  DroidWords:
+  - "boop\u2026"
+  - "boop-bwooo\u2026"
+  - "boop-bwooo\u2026 boop-beep\u2026"
+  Feelings:
+  - Atento
+  - Preocupado
+  - Conmovido
+  Travel: {x: 0.65, y: 1.7, z: 3.2}
+  Durations: {x: 2.6, y: 3.8, z: 5.2}

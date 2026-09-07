@@ -4,6 +4,8 @@ using UnityEngine;
 public sealed class BB8Personality : MonoBehaviour
 {
     public Vector3 SocialHeadPose;
+    public bool SocialSpeaking;
+    public float SocialAntenna;
     public Transform HeadVisual;
     public Transform[] Antennas;
     public AudioClip[] JumpSounds;
@@ -43,11 +45,11 @@ public sealed class BB8Personality : MonoBehaviour
     }
     void Play(AudioClip clip, float volume)
     {
-        if (clip == null) return;
+        if (clip == null || SocialSpeaking) return;
         voice.pitch = Random.Range(0.94f, 1.06f);
         voice.PlayOneShot(clip, volume);
     }
-    public void Speak(AudioClip clip, float pitch = 1f) { if (!clip) return; voice.Stop(); voice.pitch = pitch; voice.PlayOneShot(clip, 0.55f); wobbleVelocity += 25f; }
+    public void Speak(AudioClip clip, float pitch = 1f, float volume = .55f) { if (!clip) return; voice.Stop(); voice.pitch = pitch; voice.PlayOneShot(clip, volume); wobbleVelocity += 25f; }
     AudioClip Pick(AudioClip[] clips) => clips.Length == 0 ? null : clips[Random.Range(0, clips.Length)];
     void Jump() { wobbleVelocity += 35f; Play(Pick(JumpSounds), 0.52f); }
     void Boost() { wobbleVelocity += 22f; Play(BoostSound, 0.32f); }
@@ -76,7 +78,7 @@ public sealed class BB8Personality : MonoBehaviour
         wobble = Mathf.Clamp(wobble + wobbleVelocity * dt, -10f, 10f);
         for (int i = 0; i < Antennas.Length; i++)
         {
-            float sway = Mathf.Sin(t * (16f + i * 3f)) * Mathf.Min(speed * 0.18f, 2.4f);
+            float sway = Mathf.Sin(t * (16f + i * 3f)) * (Mathf.Min(speed * 0.18f, 2.4f)+SocialAntenna*1.3f);
             Antennas[i].localRotation = antennaRest[i] * Quaternion.Euler((wobble + sway) * (i == 0 ? 1f : 0.65f), sway * 0.6f, 0f);
         }
     }

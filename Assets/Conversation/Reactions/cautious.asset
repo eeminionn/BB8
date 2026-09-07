@@ -13,10 +13,24 @@ MonoBehaviour:
   m_Name: cautious
   m_EditorClassIdentifier: Assembly-CSharp::SocialReaction
   Id: cautious
-  Sound: {fileID: 8300000, guid: 21e716fac7dff46bab8844295806414f, type: 3}
+  Sound: {fileID: 8300000, guid: 0fdd5a5c8a1094cb898bb23e93dd481e, type: 3}
   Duration: 3.4
   HeadTilt: 9
   HeadSpeed: 4
   Movement: -0.08
-  Pitch: 1.1
+  Pitch: 1
   Bounce: 0
+  IntensitySounds:
+  - {fileID: 8300000, guid: 0fdd5a5c8a1094cb898bb23e93dd481e, type: 3}
+  - {fileID: 8300000, guid: 7581b490147544f16b72f764d822e2ef, type: 3}
+  - {fileID: 8300000, guid: ee11b3c8b68c241e38dac9e6f7285aa1, type: 3}
+  DroidWords:
+  - bwoo?
+  - "bwoo-brr\u2026"
+  - "bwoo-brr! boop-brr\u2026"
+  Feelings:
+  - Inquieto
+  - Nervioso
+  - Alarmado
+  Travel: {x: 0.6, y: 1.8, z: 3.6}
+  Durations: {x: 2.6, y: 3.8, z: 5.2}

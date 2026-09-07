@@ -5,6 +5,8 @@ using UnityEngine;
 public class BbRigidbodyController : MonoBehaviour
 {
     public bool AcceptPlayerInput = true;
+    public Vector3 FacingDirection { get; private set; } = Vector3.forward;
+    public bool Steering { get; private set; }
     public float Speed = 500f;
     public bool Oomph;
     public bool CanJump = true;
@@ -37,10 +39,21 @@ public class BbRigidbodyController : MonoBehaviour
         body = GetComponent<Rigidbody>();
         up = -Gravity.normalized;
         body.maxAngularVelocity = 28f;
+        if(Camera) FacingDirection=Vector3.ProjectOnPlane(Camera.forward,Vector3.up).normalized;
     }
 
-    void Update() { if (AcceptPlayerInput) SetInput(new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")),
-        Input.GetButtonDown("Jump"), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)); }
+    void Update() {
+        Steering=false;
+        if(!AcceptPlayerInput)return;
+        Drive(new Vector2(Input.GetAxis("Horizontal"),Input.GetAxis("Vertical")),Input.GetButtonDown("Jump"),Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift),Time.deltaTime);
+    }
+    public void Drive(Vector2 input,bool jump,bool boost,float dt){
+        Steering=input.sqrMagnitude>.01f;
+        FacingDirection=Quaternion.AngleAxis(input.x*110f*dt,Vector3.up)*FacingDirection;
+        var forward=Vector3.ProjectOnPlane(Camera.forward,Vector3.up).normalized;
+        var direction=FacingDirection*input.y;
+        SetInput(new Vector2(Vector3.Dot(direction,Vector3.Cross(Vector3.up,forward)),Vector3.Dot(direction,forward)),jump,boost);
+    }
 
     // Shared input boundary also allows repeatable physics checks in the editor.
     public void SetInput(Vector2 movement, bool jump, bool boost)

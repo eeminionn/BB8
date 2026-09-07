@@ -13,10 +13,24 @@ MonoBehaviour:
   m_Name: retreat
   m_EditorClassIdentifier: Assembly-CSharp::SocialReaction
   Id: retreat
-  Sound: {fileID: 8300000, guid: d29fd135b62fe4021a66eb1262cfc954, type: 3}
+  Sound: {fileID: 8300000, guid: 8e518358caed4439a808aa071d0bc863, type: 3}
   Duration: 2.8
   HeadTilt: 20
   HeadSpeed: 8
   Movement: -0.25
-  Pitch: 0.8
+  Pitch: 1
   Bounce: 0
+  IntensitySounds:
+  - {fileID: 8300000, guid: 8e518358caed4439a808aa071d0bc863, type: 3}
+  - {fileID: 8300000, guid: 2cc17e99709ac40bda32000f1b7c6445, type: 3}
+  - {fileID: 8300000, guid: 657606d501a174aa88df38e84c07a4ad, type: 3}
+  DroidWords:
+  - brr-beep!
+  - brrr-bweep!
+  - brrr-bweep! brr-beep-beep!
+  Feelings:
+  - "Inc\xF3modo"
+  - Asustado
+  - Aterrado
+  Travel: {x: 0.85, y: 2.4, z: 4.8}
+  Durations: {x: 2.6, y: 3.8, z: 5.2}

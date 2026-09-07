@@ -13,10 +13,24 @@ MonoBehaviour:
   m_Name: attentive
   m_EditorClassIdentifier: Assembly-CSharp::SocialReaction
   Id: attentive
-  Sound: {fileID: 8300000, guid: 83eb3f8e2417b435188fb0ee3da82a54, type: 3}
+  Sound: {fileID: 8300000, guid: 6876fa515912744eba44b64d1163ad81, type: 3}
   Duration: 2.4
   HeadTilt: 7
   HeadSpeed: 3
   Movement: 0
-  Pitch: 0.95
+  Pitch: 1
   Bounce: 0
+  IntensitySounds:
+  - {fileID: 8300000, guid: 6876fa515912744eba44b64d1163ad81, type: 3}
+  - {fileID: 8300000, guid: febead27a1d7a4bdb9d8ddbd281bd293, type: 3}
+  - {fileID: 8300000, guid: 3e032b88bf09c4c3f985cff405f8d572, type: 3}
+  DroidWords:
+  - beep.
+  - beep-boop.
+  - beep-boop, beep-beep.
+  Feelings:
+  - Atento
+  - Interesado
+  - Expectante
+  Travel: {x: 0.5, y: 1.1, z: 2}
+  Durations: {x: 2.6, y: 3.8, z: 5.2}

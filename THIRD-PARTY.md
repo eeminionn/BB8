@@ -12,3 +12,9 @@
 - Sin API de pago. Procesamiento en el Mac mediante MLX / Metal. El servicio escucha exclusivamente en 127.0.0.1 y exige un token local para procesar solicitudes.
 
 El repositorio BB8 original conserva su licencia y créditos. Los sonidos nuevos del desguace son síntesis original creada para este proyecto.
+
+## Grabaciones de BB-8 para reacciones
+
+18 extractos completos del [fork eeminionn/bb8-sounds](https://github.com/eeminionn/bb8-sounds), procedente de [anddav87/bb8-sounds](https://github.com/anddav87/bb8-sounds), cuyo README los describe como efectos oficiales de BB-8 para Sphero. Se convirtieron de MP3 a WAV mono, se normalizó el volumen y se añadieron fundidos de 6 ms para evitar clics. La correspondencia exacta está en `Assets/Conversation/Audio/sources.json`. El repositorio no publica una licencia específica para estas grabaciones; conservan los derechos de sus titulares.
+
+La búsqueda encontró un [catálogo de The Sounds Resource](https://sounds.spriters-resource.com/pc_computer/legostarwarstheskywalkersaga/asset/438626/) con nombres como HAPPYCHIRP y ANGRYCHIRP, pero no se pudo descargar. Las asignaciones de esta implementación son provisionales, según duración y contorno acústico, para acompañar gestos; no son etiquetas emocionales oficiales ni resultados de validación con participantes.

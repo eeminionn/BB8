@@ -13,8 +13,9 @@ public sealed class ConversationDirector : MonoBehaviour
     string typed="";
     Renderer[] hidden=new Renderer[0];
     GUIStyle label,title;
-    void Start(){Voice.Result+=React;ApplyView();}
-    void React(VoiceResult result){Brain.React(result.reaction,result.intensity);}
+    public BB8ReactionPopup Popup { get; private set; }
+    void Start(){Popup=gameObject.AddComponent<BB8ReactionPopup>();Popup.Initialize(Brain);Voice.Result+=React;ApplyView();}
+    void React(VoiceResult result){Brain.React(result.reaction,result.intensity,result.attitude);}
     public void SwitchCharacter(){ControlBB8=!ControlBB8;BB8.SetInput(Vector2.zero,false,false);ApplyView();}
     public void SwitchPOV(){View.FirstPerson=!View.FirstPerson;ApplyView();}
     void ApplyView(){
@@ -55,16 +56,17 @@ public sealed class ConversationDirector : MonoBehaviour
         if(Typing){GUI.SetNextControlName("utterance");typed=GUI.TextField(new Rect(34,166,w-128,28),typed,600);GUI.FocusControl("utterance");
             if(GUI.Button(new Rect(w-84,166,90,28),"Enviar") || Event.current.type==EventType.KeyDown&&Event.current.keyCode==KeyCode.Return){Voice.SendText(typed);typed="";Typing=false;Event.current.Use();}
         }
-        if(!string.IsNullOrEmpty(Voice.Transcript)){GUI.Box(new Rect(width/2f-w/2,height-174,w,54),GUIContent.none);GUI.Label(new Rect(width/2f-w/2+12,height-168,w-24,46),"“"+Voice.Transcript+"”",label);}
+        if(Popup && Popup.Visible && !string.IsNullOrEmpty(Voice.Transcript)){GUI.Box(new Rect(width/2f-w/2,height-174,w,54),GUIContent.none);GUI.Label(new Rect(width/2f-w/2+12,height-168,w-24,46),"“"+Voice.Transcript+"”",label);}
         GUI.Label(new Rect(24,height-32,width-48,25),"TAB personaje   ·   V vista   ·   E mantener para hablar   ·   T escribir   ·   F3 diagnóstico",label);
         if(diagnostic){
-            GUI.Box(new Rect(width-330,90,310,220),GUIContent.none);
+            GUI.Box(new Rect(width-330,90,310,168),GUIContent.none);
             var r=Voice.LastResult;
             GUI.Label(new Rect(width-315,102,280,100),r==null?"Aún no hay una interpretación.":"Interpretación del texto (estimación)\n"+r.emotion+" / "+r.attitude+"\nIntensidad: "+r.intensity+" · "+r.seconds.ToString("0.0")+" s\nReacción: "+r.reaction,label);
             var devices=Microphone.devices;
             if(GUI.Button(new Rect(width-315,203,280,28),devices.Length==0?"Sin micrófono":"Mic: "+devices[Mathf.Clamp(Voice.MicrophoneIndex,0,devices.Length-1)])&&!Voice.Recording)Voice.MicrophoneIndex=(Voice.MicrophoneIndex+1)%Mathf.Max(1,devices.Length);
-            if(GUI.Button(new Rect(width-315,245,132,28),"Probar alegría")&&!Voice.Busy&&!Brain.Busy)Brain.React("celebrate",2);
-            if(GUI.Button(new Rect(width-177,245,132,28),"Probar retirada")&&!Voice.Busy&&!Brain.Busy)Brain.React("retreat",2);
+            for(int level=1;level<=3;level++){
+                if(GUI.Button(new Rect(width-315+(level-1)*94,235,90,22),"Alegría "+level)&&!Voice.Busy&&!Brain.Busy)Brain.React("celebrate",level,"friendly");
+            }
         }
         GUI.matrix=previousMatrix;
     }

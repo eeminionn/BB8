@@ -13,10 +13,24 @@ MonoBehaviour:
   m_Name: puzzled
   m_EditorClassIdentifier: Assembly-CSharp::SocialReaction
   Id: puzzled
-  Sound: {fileID: 8300000, guid: 5ab12625563904f47babe27788fc27b9, type: 3}
+  Sound: {fileID: 8300000, guid: 8c283473fa8164aeab6205537d536d73, type: 3}
   Duration: 2.7
   HeadTilt: 20
   HeadSpeed: 2
   Movement: 0
-  Pitch: 0.75
+  Pitch: 1
   Bounce: 0
+  IntensitySounds:
+  - {fileID: 8300000, guid: 8c283473fa8164aeab6205537d536d73, type: 3}
+  - {fileID: 8300000, guid: fd17865d189794859a6de452755e0431, type: 3}
+  - {fileID: 8300000, guid: 16f483ac34e634d56beaf36726229780, type: 3}
+  DroidWords:
+  - bweep?
+  - bweep-boop?
+  - bweep-boop? bweee?
+  Feelings:
+  - Intrigado
+  - Confundido
+  - Desconcertado
+  Travel: {x: 0.5, y: 1.2, z: 2.5}
+  Durations: {x: 2.6, y: 3.8, z: 5.2}
