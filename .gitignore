@@ -35,3 +35,7 @@ sysinfo.txt
 /UserSettings/
 /.vscode/
 *.slnx
+/.local-voice/
+
+__pycache__/
+*.pyc

@@ -21,11 +21,14 @@ public static class BB8Setup
         OpenDemo();
         EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
         PlayerSettings.productName = "BB8";
+        PlayerSettings.iOS.microphoneUsageDescription = "Habla con BB-8. El audio se procesa solamente en este Mac y no se guarda.";
         PlayerSettings.companyName = "eeminionn";
         PlayerSettings.defaultScreenWidth = 1280;
         PlayerSettings.defaultScreenHeight = 800;
         PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
         PlayerSettings.runInBackground = false;
+        // The speech service uses authenticated HTTP on loopback only.
+        PlayerSettings.insecureHttpOption = InsecureHttpOption.AlwaysAllowed;
         PlayerSettings.SetArchitecture(UnityEditor.Build.NamedBuildTarget.Standalone, 1);
         var controllers = UnityEngine.Object.FindObjectsByType<BbRigidbodyController>();
         if (controllers.Length != 1 || controllers[0].Head == null || controllers[0].Camera == null)

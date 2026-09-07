@@ -11,7 +11,7 @@ public sealed class BB8DemoHelp : MonoBehaviour
     void Update()
     {
         displayedBattery = Mathf.MoveTowards(displayedBattery, controller.Battery, Time.deltaTime * 1.5f);
-        if (Input.GetKeyDown(KeyCode.R) || transform.position.y < -8f)
+        if ((!FindFirstObjectByType<ConversationDirector>() && Input.GetKeyDown(KeyCode.R)) || transform.position.y < -8f)
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     void OnGUI()
@@ -29,7 +29,7 @@ public sealed class BB8DemoHelp : MonoBehaviour
         GUI.color = new Color(1, 1, 1, 0.85f);
         GUI.Label(new Rect(28, 25, 310, 24), "D E S G U A C E   / /   0 8", title);
         GUI.Label(new Rect(28, 50, 280, 20), "EXPLORACIÓN LIBRE", small);
-        float y = height - 114;
+        float y = height - 140;
         RectFill(new Rect(24, y, 278, 90), new Color(0.025f, 0.06f, 0.07f, 0.87f));
         string state = controller.IsBoosting ? "IMPULSO" : controller.Battery < 0.12f ? "BUSCA UNA CELDA" : "ENERGÍA";
         GUI.color = Color.white;
@@ -44,7 +44,7 @@ public sealed class BB8DemoHelp : MonoBehaviour
         GUI.color = Color.white;
         GUI.Label(new Rect(40, y + 59, 246, 22), "SHIFT · turbo   /   celdas azules · recarga", small);
         var controls = new GUIStyle(small) { alignment = TextAnchor.LowerRight };
-        GUI.Label(new Rect(width - 670, height - 52, 642, 26), "WASD  mover    ·    ESPACIO  saltar    ·    MOUSE  mirar    ·    RUEDA  zoom    ·    R  volver", controls);
+        GUI.Label(new Rect(width - 670, height - 67, 642, 26), "WASD  mover    ·    ESPACIO  saltar    ·    MOUSE  mirar    ·    RUEDA  zoom", controls);
         GUI.color = Color.white;
         GUI.matrix = oldMatrix;
     }

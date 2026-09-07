@@ -4,6 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody), typeof(Collider))]
 public class BbRigidbodyController : MonoBehaviour
 {
+    public bool AcceptPlayerInput = true;
     public float Speed = 500f;
     public bool Oomph;
     public bool CanJump = true;
@@ -38,8 +39,8 @@ public class BbRigidbodyController : MonoBehaviour
         body.maxAngularVelocity = 28f;
     }
 
-    void Update() => SetInput(new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")),
-        Input.GetButtonDown("Jump"), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+    void Update() { if (AcceptPlayerInput) SetInput(new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical")),
+        Input.GetButtonDown("Jump"), Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)); }
 
     // Shared input boundary also allows repeatable physics checks in the editor.
     public void SetInput(Vector2 movement, bool jump, bool boost)

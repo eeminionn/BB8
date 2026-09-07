@@ -3,6 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(BbRigidbodyController), typeof(AudioSource))]
 public sealed class BB8Personality : MonoBehaviour
 {
+    public Vector3 SocialHeadPose;
     public Transform HeadVisual;
     public Transform[] Antennas;
     public AudioClip[] JumpSounds;
@@ -46,6 +47,7 @@ public sealed class BB8Personality : MonoBehaviour
         voice.pitch = Random.Range(0.94f, 1.06f);
         voice.PlayOneShot(clip, volume);
     }
+    public void Speak(AudioClip clip, float pitch = 1f) { if (!clip) return; voice.Stop(); voice.pitch = pitch; voice.PlayOneShot(clip, 0.55f); wobbleVelocity += 25f; }
     AudioClip Pick(AudioClip[] clips) => clips.Length == 0 ? null : clips[Random.Range(0, clips.Length)];
     void Jump() { wobbleVelocity += 35f; Play(Pick(JumpSounds), 0.52f); }
     void Boost() { wobbleVelocity += 22f; Play(BoostSound, 0.32f); }
@@ -67,7 +69,7 @@ public sealed class BB8Personality : MonoBehaviour
         if (HeadVisual != null)
             HeadVisual.localRotation = Quaternion.Euler(idleBlend * Mathf.Sin(t * 0.8f) * 2.2f,
                 idleBlend * Mathf.Sin(t * 1.1f + 1f) * 1.6f,
-                idleBlend * (Mathf.Sin(t * 0.53f) * 12f + Mathf.Sin(t * 0.21f) * 5f));
+                idleBlend * (Mathf.Sin(t * 0.53f) * 12f + Mathf.Sin(t * 0.21f) * 5f)) * Quaternion.Euler(SocialHeadPose);
         float acceleration = Mathf.Clamp((body.linearVelocity - lastVelocity).magnitude, 0f, 2f);
         lastVelocity = body.linearVelocity;
         wobbleVelocity += (acceleration * 14f - wobble * 130f - wobbleVelocity * 9f) * dt;
