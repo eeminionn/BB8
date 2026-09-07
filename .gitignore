@@ -38,4 +38,5 @@ sysinfo.txt
 /.local-voice
 
 __pycache__/
+__pycache__.meta
 *.pyc

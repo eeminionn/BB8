@@ -25,6 +25,11 @@ public sealed class BB8ReactionPopup : MonoBehaviour
         Affinity=Mathf.Clamp01(Affinity+change);
         shown=Time.time;expires=shown+brain.ReactionDuration+3f;
     }
+    public void ShowCommand(string command)
+    {
+        words=command=="follow"?"Beep-boop!":"Boop-beep!";Feeling="Entendido";
+        shown=Time.time;expires=shown+4f;
+    }
     void Update(){displayed=Mathf.MoveTowards(displayed,Affinity,Time.deltaTime*.35f);}
     void OnGUI()
     {

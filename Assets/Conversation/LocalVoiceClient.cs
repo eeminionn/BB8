@@ -6,7 +6,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 
-[Serializable] public sealed class VoiceResult { public string emotion, attitude, reaction, text, error; public int intensity; public float seconds; }
+[Serializable] public sealed class VoiceResult { public string emotion, attitude, reaction, text, error, command; public int intensity; public float seconds; }
 public sealed class LocalVoiceClient : MonoBehaviour
 {
     [Serializable] class Health { public string service, error; public bool ready; }

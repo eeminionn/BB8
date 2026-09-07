@@ -8,6 +8,11 @@ public sealed class BB8SocialBrain : MonoBehaviour
     public SocialReaction[] Reactions;
     public bool Busy { get; private set; }
     public bool Listening;
+    public bool Autonomous => following || leaving;
+    public bool Following => following;
+    bool following, leaving;
+    Vector3 departureTarget;
+    float departureRemaining;
     public int Strength { get; private set; }
     public float ReactionDuration { get; private set; }
     public event Action<SocialReaction,int,string> ReactionStarted;
@@ -21,6 +26,53 @@ public sealed class BB8SocialBrain : MonoBehaviour
     const int EnvironmentMask = ~((1<<8)|(1<<9));
 
     void Awake() { motor=GetComponent<BbRigidbodyController>(); personality=GetComponent<BB8Personality>(); body=GetComponent<Rigidbody>(); }
+
+    public bool ExecuteCommand(string command)
+    {
+        if(!Partner || (command!="follow" && command!="away"))return false;
+        CancelCommand();Busy=false;personality.SocialSpeaking=false;personality.SocialAntenna=0;
+        following=command=="follow";leaving=!following;
+        var away=Vector3.ProjectOnPlane(body.position-Partner.position,Vector3.up).normalized;
+        if(away.sqrMagnitude<.1f)away=-motor.FacingDirection;
+        departureTarget=body.position+away*6f;departureRemaining=8f;
+        var acknowledgment=Array.Find(Reactions,r=>r && r.Id=="attentive");
+        if(acknowledgment)personality.Speak(acknowledgment.Clip(1),1f,.6f);
+        return true;
+    }
+    public void CancelCommand()
+    {
+        if(Autonomous)body.linearVelocity=Vector3.Project(body.linearVelocity,Vector3.up);
+        following=leaving=false;motor.SetInput(Vector2.zero,false,false);
+    }
+    bool SafeDirection(Vector3 direction,float distance)
+    {
+        return !Physics.SphereCast(body.position+Vector3.up*.08f,.43f,direction,out _,distance,EnvironmentMask,QueryTriggerInteraction.Ignore)
+            && Physics.Raycast(body.position+direction*distance+Vector3.up*.45f,Vector3.down,2f,EnvironmentMask,QueryTriggerInteraction.Ignore);
+    }
+    void MoveCommand()
+    {
+        motor.SetInput(Vector2.zero,false,false);
+        var toward=Vector3.ProjectOnPlane(Partner.position-body.position,Vector3.up);
+        var error=following?toward:Vector3.ProjectOnPlane(departureTarget-body.position,Vector3.up);
+        if(leaving){departureRemaining-=Time.fixedDeltaTime;if(error.magnitude<.4f||departureRemaining<=0){CancelCommand();return;}}
+        float distance=following?Mathf.Max(0,error.magnitude-2f):error.magnitude;
+        var desired=error.normalized*Mathf.Min(4.8f,distance*2.5f);
+        float lookAhead=.7f+Vector3.ProjectOnPlane(body.linearVelocity,Vector3.up).magnitude*.28f;
+        if(desired.sqrMagnitude>.01f && !SafeDirection(desired.normalized,lookAhead))
+        {
+            Vector3 alternate=Vector3.zero;
+            foreach(float angle in new[]{35f,-35f,65f,-65f})
+            {
+                var direction=Quaternion.AngleAxis(angle,Vector3.up)*desired.normalized;
+                if(SafeDirection(direction,lookAhead)){alternate=direction*Mathf.Min(2f,desired.magnitude);break;}
+            }
+            desired=alternate;
+        }
+        if(toward.magnitude<1.6f && Vector3.Dot(desired,toward)>0)desired=Vector3.zero;
+        body.AddForce(Vector3.ClampMagnitude((desired-Vector3.ProjectOnPlane(body.linearVelocity,Vector3.up))*12f,22f),ForceMode.Acceleration);
+        float yaw=Vector3.SignedAngle(Vector3.ProjectOnPlane(motor.Head.transform.up,Vector3.up),following?toward:error,Vector3.up);
+        personality.SocialHeadPose=Vector3.Lerp(personality.SocialHeadPose,new Vector3(3,0,Mathf.Clamp(yaw,-65,65)),.16f);
+    }
 
     public void React(string id, int strength, string attitude = "neutral")
     {
@@ -67,6 +119,7 @@ public sealed class BB8SocialBrain : MonoBehaviour
     void FixedUpdate()
     {
         if(!Partner) return;
+        if(!Busy && !Listening && Autonomous){MoveCommand();return;}
         if(!Busy && !Listening) { personality.SocialHeadPose=Vector3.Lerp(personality.SocialHeadPose,Vector3.zero,.16f);return; }
         var toward=Vector3.ProjectOnPlane(Partner.position-body.position,Vector3.up);
         float yaw=Vector3.SignedAngle(Vector3.ProjectOnPlane(motor.Head.transform.up,Vector3.up),toward,Vector3.up);

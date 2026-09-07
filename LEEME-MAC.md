@@ -67,3 +67,10 @@ Hay 18 grabaciones normalizadas de `eeminionn/bb8-sounds`. Las asociaciones emoc
 Para reconstruir: **BB8 > Build Mac App**. Para verificar: **BB8 > Verify Expressions**, **BB8 > Verify Conversation**, **BB8 > Verify Scrapyard**, y `.local-voice/venv/bin/python Assets/StreamingAssets/VoiceService/verify.py` con el servicio activo. Informes en `Logs/`. **Install Conversation** reinstala los objetos de conversación de la escena; conserva perfiles existentes.
 
 Créditos del Minion y modelos locales: `THIRD-PARTY.md`.
+# Órdenes de movimiento
+
+Di **«sígueme»** manteniendo E o escríbelo con T: BB-8 seguirá al Minion conservando unos dos metros de distancia. Puedes seguir hablándole; pausa el seguimiento para escuchar y reaccionar.
+
+Di **«aléjate»** para cancelar el seguimiento y retirarse unos seis metros. Se detiene al llegar o tras ocho segundos si el camino está bloqueado. Tab al tomar el control de BB-8 cancela la orden. Las órdenes aceptan tildes y «por favor», confirman con un beep y «Entendido», y no cambian la afinidad.
+
+El movimiento usa colisiones, detección de bordes y desvíos locales ante obstáculos. No planifica rutas completas por laberintos ni salta huecos automáticamente.

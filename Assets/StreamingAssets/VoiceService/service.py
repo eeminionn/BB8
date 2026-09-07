@@ -4,7 +4,7 @@ from pathlib import Path
 BASE=Path(os.environ.get('BB8_PROJECT',Path(__file__).resolve().parents[3])).resolve()
 os.environ['HF_HUB_OFFLINE']='1'
 os.environ['TOKENIZERS_PARALLELISM']='false'
-import json,io,time,secrets,logging,threading,base64
+import json,io,time,secrets,logging,threading,base64,re,unicodedata
 from http.server import ThreadingHTTPServer,BaseHTTPRequestHandler
 from concurrent.futures import ThreadPoolExecutor
 import numpy as np
@@ -47,7 +47,19 @@ def initialize():
  except Exception as e:
   error=str(e);logging.exception('startup failed')
 
+def special_command(text):
+    value=''.join(c for c in unicodedata.normalize('NFD',text.lower()) if not unicodedata.combining(c))
+    value=re.sub(r'[,.!¡?¿:;]', ' ', value)
+    value=' '.join(value.split())
+    match=re.fullmatch(r'(?:(?:oye|por favor|bb[- −]?8)\s+)*(sigueme|alejate)(?:\s+(?:por favor|bb[- −]?8|de mi))*',value)
+    if not match:
+        return None
+    return 'follow' if match.group(1)=='sigueme' else 'away'
+
 def classify(text,history):
+ command=special_command(text)
+ if command:
+  return dict(command=command,emotion='neutral',attitude='neutral',intensity=1,reaction='attentive',text=text)
  if not text.strip():return {'emotion':'uncertain','attitude':'neutral','intensity':1,'reaction':'puzzled','text':''}
  payload={'previous_utterances':[str(s)[:500] for s in history[-3:]],'current_utterance':text[:1200]}
  prompt=tokenizer.apply_chat_template([{'role':'system','content':SYSTEM},{'role':'user','content':json.dumps(payload,ensure_ascii=False)}],tokenize=False,add_generation_prompt=True)

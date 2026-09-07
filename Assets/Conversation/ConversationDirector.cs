@@ -15,8 +15,8 @@ public sealed class ConversationDirector : MonoBehaviour
     GUIStyle label,title;
     public BB8ReactionPopup Popup { get; private set; }
     void Start(){Popup=gameObject.AddComponent<BB8ReactionPopup>();Popup.Initialize(Brain);Voice.Result+=React;ApplyView();}
-    void React(VoiceResult result){Brain.React(result.reaction,result.intensity,result.attitude);}
-    public void SwitchCharacter(){ControlBB8=!ControlBB8;BB8.SetInput(Vector2.zero,false,false);ApplyView();}
+    void React(VoiceResult result){if(Brain.ExecuteCommand(result.command))Popup.ShowCommand(result.command);else Brain.React(result.reaction,result.intensity,result.attitude);}
+    public void SwitchCharacter(){ControlBB8=!ControlBB8;if(ControlBB8)Brain.CancelCommand();BB8.SetInput(Vector2.zero,false,false);ApplyView();}
     public void SwitchPOV(){View.FirstPerson=!View.FirstPerson;ApplyView();}
     void ApplyView(){
         foreach(var r in hidden)if(r)r.enabled=true;
@@ -38,7 +38,7 @@ public sealed class ConversationDirector : MonoBehaviour
         }
         bool conversational=Voice.Busy||Voice.Recording||Brain.Busy;
         Brain.Listening=Voice.Ready&&(Voice.Busy||Voice.Recording);
-        bool manual=ControlBB8&&!conversational&&!Typing;
+        bool manual=ControlBB8&&!conversational&&!Typing&&!Brain.Autonomous;
         if(BB8.AcceptPlayerInput && !manual) BB8.SetInput(Vector2.zero,false,false);
         BB8.AcceptPlayerInput=manual;Minion.Controlled=!ControlBB8&&!Typing;
         View.SuspendInput=Typing;
