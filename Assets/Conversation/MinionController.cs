@@ -3,31 +3,65 @@ using UnityEngine;
 public sealed class MinionController : MonoBehaviour
 {
     public bool Controlled;
+    public bool Speaking;
     public Transform Camera, Visual;
     public Transform LeftArm, RightArm, LeftLeg, RightLeg;
+    public bool Grounded {get;private set;}
+    public string MotionState {get;private set;}="Reposo";
+    public Vector3 FacingDirection => transform.forward;
+    public bool Steering {get;private set;}
     CharacterController motor;
     Quaternion[] rests;
+    Vector3[] swingAxes, spreadAxes;
     Transform[] bones;
-    float vertical, gait;
+    float vertical,gait,speed,blend,landed,lastGround=-10,jumpUntil=-10,waveUntil;
     Vector3 spawn;
-    public Vector3 FacingDirection => transform.forward;
-    public bool Steering { get; private set; }
-    void Awake() {
-        motor = GetComponent<CharacterController>(); spawn = transform.position;
-        if(Camera) transform.rotation=Quaternion.LookRotation(Vector3.ProjectOnPlane(Camera.forward,Vector3.up).normalized);
-        bones = new[] { LeftArm, RightArm, LeftLeg, RightLeg };
-        rests = new Quaternion[4]; for (int i=0;i<4;i++) if(bones[i]) rests[i]=bones[i].localRotation;
+    const int GroundMask=~((1<<8)|(1<<9));
+    void Awake(){
+        motor=GetComponent<CharacterController>();spawn=transform.position;
+        bones=new[]{LeftArm,RightArm,LeftLeg,RightLeg};rests=new Quaternion[4];swingAxes=new Vector3[4];spreadAxes=new Vector3[4];
+        for(int i=0;i<4;i++)if(bones[i]){
+            rests[i]=bones[i].localRotation;
+            swingAxes[i]=bones[i].InverseTransformDirection(transform.right);
+            spreadAxes[i]=bones[i].InverseTransformDirection(transform.forward);
+        }
     }
-    void Update() {
-        var input = Controlled ? Vector2.ClampMagnitude(new Vector2(Input.GetAxis("Horizontal"),Input.GetAxis("Vertical")),1) : Vector2.zero;
+    void Update(){
+        var input=Controlled?Vector2.ClampMagnitude(new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical")),1):Vector2.zero;
+        if(Controlled&&Input.GetKeyDown(KeyCode.H))Wave();
+        Drive(input,Controlled&&Input.GetButtonDown("Jump"),Time.deltaTime);
+    }
+    public void Wave(){waveUntil=Time.time+1.8f;}
+    public void Drive(Vector2 input,bool jump,float dt){
+        if(!motor.enabled||dt<=0)return;
+        bool wasGrounded=Grounded;
+        Grounded=motor.isGrounded||(vertical<=0&&Physics.SphereCast(transform.position+Vector3.up*.24f,.20f,Vector3.down,out _,.10f,GroundMask,QueryTriggerInteraction.Ignore));
+        if(Grounded){lastGround=Time.time;if(vertical<0)vertical=-3;if(!wasGrounded)landed=1;}
+        if(jump)jumpUntil=Time.time+.12f;
+        if(Time.time<jumpUntil&&Time.time-lastGround<.12f){vertical=5.5f;jumpUntil=-10;lastGround=-10;Grounded=false;}
         Steering=input.sqrMagnitude>.01f;
-        transform.Rotate(0,input.x*110f*Time.deltaTime,0,Space.World);
-        var direction=transform.forward*input.y;
-        if(motor.isGrounded) { vertical=-2f; if(Controlled && Input.GetButtonDown("Jump")) vertical=6f; }
-        vertical-=18f*Time.deltaTime;
-        motor.Move((direction*4.5f+Vector3.up*vertical)*Time.deltaTime);
-        gait+=Time.deltaTime*10f;
-        for(int i=0;i<4;i++) if(bones[i]) bones[i].localRotation=rests[i]*Quaternion.Euler(Mathf.Sin(gait+(i%2)*Mathf.PI)*Mathf.Abs(input.y)*25f,0,0);
-        if(transform.position.y < -8) { motor.enabled=false; transform.position=spawn; motor.enabled=true; vertical=0; }
+        transform.Rotate(0,input.x*100f*dt,0,Space.World);
+        speed=Mathf.MoveTowards(speed,input.y*3.2f,dt*(Mathf.Abs(input.y)>.01f?8f:12f));
+        vertical=Mathf.Max(-22,vertical-20f*dt);
+        var flags=motor.Move((transform.forward*speed+Vector3.up*vertical)*dt);
+        if((flags&CollisionFlags.Above)!=0&&vertical>0)vertical=0;
+        if((flags&CollisionFlags.Below)!=0&&vertical<0){Grounded=true;vertical=-3;}
+        float actualSpeed=Vector3.ProjectOnPlane(motor.velocity,Vector3.up).magnitude;
+        blend=Mathf.MoveTowards(blend,Grounded?Mathf.Clamp01(actualSpeed/3.2f):0,dt*7);
+        gait+=dt*actualSpeed*3.7f;landed=Mathf.MoveTowards(landed,0,dt*5);
+        bool waving=Time.time<waveUntil;
+        MotionState=!Grounded?(vertical>0?"Salto":"Caída"):waving?"Saludo":Speaking?"Hablando":landed>.1f?"Aterrizaje":blend>.1f?"Caminando":"Reposo";
+        for(int i=0;i<4;i++)if(bones[i]){
+            float phase=gait+(i%2)*Mathf.PI+(i<2?Mathf.PI:0);
+            float swing=Mathf.Sin(phase)*blend*(i<2?18:24);
+            float spread=0;
+            if(i<2){swing+=Mathf.Sin(Time.time*1.7f+i)*1.6f*(1-blend);if(!Grounded)spread=(i==0?-1:1)*24;}
+            else if(!Grounded)swing=vertical>0?-22:10;
+            if(i==1&&(waving||Speaking)){spread=waving?110:35;swing=(waving?Mathf.Sin(Time.time*11)*22:Mathf.Sin(Time.time*4)*5)-20;}
+            if(i>=2)swing-=landed*8;
+            var target=rests[i]*Quaternion.AngleAxis(swing,swingAxes[i])*Quaternion.AngleAxis(spread,spreadAxes[i]);
+            bones[i].localRotation=Quaternion.Slerp(bones[i].localRotation,target,1-Mathf.Exp(-14*dt));
+        }
+        if(transform.position.y<-8){motor.enabled=false;transform.position=spawn;motor.enabled=true;vertical=speed=0;}
     }
 }

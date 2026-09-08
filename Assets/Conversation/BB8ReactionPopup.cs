@@ -72,14 +72,15 @@ public sealed class BB8ReactionPopup : MonoBehaviour
         displayed=Mathf.MoveTowards(displayed,Affinity,Time.deltaTime*.35f);
         if(!bubble)return;
         var camera=Camera.main;
-        bool show=Visible&&brain&&camera;
+        bool show=Visible&&brain&&camera&&!(ExperienceShell.Instance&&ExperienceShell.Instance.MenuOpen);
         if(show){
             var orbit=camera.GetComponent<DragMouseOrbit>();
             show=!(orbit&&orbit.FirstPerson&&orbit.Target==brain.transform);
         }
         bubble.gameObject.SetActive(show);
         if(!show)return;
-        bubble.position=brain.transform.position+Vector3.up*1.85f;
+        bubble.position=brain.transform.position+Vector3.up*1.45f;
+        bubble.localScale=Vector3.one*.72f;
         bubble.rotation=camera.transform.rotation;
         caption.text=Feeling;
         marker.localPosition=new Vector3((.5f-displayed)*1.245f,-.135f,-.025f);

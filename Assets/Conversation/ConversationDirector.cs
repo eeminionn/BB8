@@ -13,7 +13,6 @@ public sealed class ConversationDirector : MonoBehaviour
     bool suppressOpeningT;
     string typed="";
     Renderer[] hidden=new Renderer[0];
-    GUIStyle label,title;
     public BB8ReactionPopup Popup { get; private set; }
     void Start(){Popup=gameObject.AddComponent<BB8ReactionPopup>();Popup.Initialize(Brain);Voice.Result+=React;ApplyView();}
     void React(VoiceResult result){if(Brain.ExecuteCommand(result.command))Popup.ShowCommand(result.command);else Brain.React(result.reaction,result.intensity,result.attitude);}
@@ -29,6 +28,7 @@ public sealed class ConversationDirector : MonoBehaviour
         }
     }
     void Update(){
+        if(ExperienceShell.Instance&&ExperienceShell.Instance.MenuOpen){BB8.AcceptPlayerInput=false;BB8.SetInput(Vector2.zero,false,false);Minion.Controlled=false;View.SuspendInput=true;return;}
         if(Input.GetKeyDown(KeyCode.F3))diagnostic=!diagnostic;
         if(!Typing){
             if(Input.GetKeyDown(KeyCode.Tab))SwitchCharacter();
@@ -37,12 +37,14 @@ public sealed class ConversationDirector : MonoBehaviour
         }
         bool conversational=Voice.Busy||Voice.Recording||Brain.Busy;
         Brain.Listening=Voice.Ready&&(Voice.Busy||Voice.Recording);
+        Minion.Speaking=Voice.Recording;
         bool manual=ControlBB8&&!conversational&&!Typing&&!Brain.Autonomous;
         if(BB8.AcceptPlayerInput && !manual) BB8.SetInput(Vector2.zero,false,false);
         BB8.AcceptPlayerInput=manual;Minion.Controlled=!ControlBB8&&!Typing;
         View.SuspendInput=Typing;
     }
     void OnGUI(){
+        if(ExperienceShell.Instance&&ExperienceShell.Instance.MenuOpen)return;
         // Handle shortcuts before TextField consumes Return.
         var e=Event.current;
         if(suppressOpeningT && e.keyCode==KeyCode.None && (e.character=='t'||e.character=='T')){
@@ -57,29 +59,43 @@ public sealed class ConversationDirector : MonoBehaviour
             if(e.keyCode==KeyCode.Escape){Typing=false;e.Use();}
             else if(e.keyCode==KeyCode.Return||e.keyCode==KeyCode.KeypadEnter){SubmitText();e.Use();}
         }
-        var previousMatrix=GUI.matrix;
-        float scale=Mathf.Max(.75f,Screen.height/900f),width=Screen.width/scale,height=Screen.height/scale;
+        UITheme.Init();var previousMatrix=GUI.matrix;
+        float scale=Mathf.Max(.65f,Mathf.Min(Screen.height/900f,Screen.width/1280f)),width=Screen.width/scale,height=Screen.height/scale;
         GUI.matrix=Matrix4x4.Scale(Vector3.one*scale);
-        if(label==null){label=new GUIStyle(GUI.skin.label){fontSize=14,wordWrap=true,normal={textColor=new Color(.85f,.93f,.93f)}};title=new GUIStyle(label){fontSize=18,fontStyle=FontStyle.Bold};}
-        float w=Mathf.Min(570,width-40);
-        GUI.Box(new Rect(20,82,w,Typing?152:102),GUIContent.none);
-        GUI.Label(new Rect(34,91,w-28,26),(ControlBB8?"BB-8":"MINION")+"  /  "+(View.FirstPerson?"PRIMERA PERSONA":"TERCERA PERSONA"),title);
-        GUI.Label(new Rect(34,122,w-28,46),Voice.Status,label);
-        if(!Voice.Ready&&!Voice.Busy&&GUI.Button(new Rect(34,156,110,24),"Reintentar"))Voice.Retry();
-        if(Typing){GUI.SetNextControlName("utterance");typed=GUI.TextField(new Rect(34,166,w-128,28),typed,600);GUI.FocusControl("utterance");
-            if(GUI.Button(new Rect(w-84,166,90,28),"Enviar"))SubmitText();
+        UITheme.Panel(new Rect(24,24,300,64));
+        GUI.Label(new Rect(40,32,265,22),"BB–8    /    DESGUACE 08",UITheme.Kicker);
+        GUI.Label(new Rect(40,57,265,20),(ControlBB8?"BB–8":"MINION")+"   ·   "+(View.FirstPerson?"Primera persona":"Tercera persona"),UITheme.Small);
+        string state=Voice.Recording?"ESCUCHANDO":Voice.Busy?(Voice.Ready?"PREPARANDO RESPUESTA":"INICIANDO VOZ"):Voice.Ready?"VOZ LISTA":"VOZ NO DISPONIBLE";
+        UITheme.Panel(new Rect(width-270,24,246,64));
+        GUI.Label(new Rect(width-254,32,215,22),state,UITheme.Kicker);
+        GUI.Label(new Rect(width-254,57,215,20),ExperienceShell.Instance&&ExperienceShell.Instance.Muted?"Sonido desactivado":"Sonido activado",UITheme.Small);
+        float w=Mathf.Min(620,width-48),x=(width-w)/2;
+        if(Typing){
+            UITheme.Panel(new Rect(x,height-185,w,126));UITheme.Fill(new Rect(x,height-185,3,126),UITheme.Accent);
+            GUI.Label(new Rect(x+18,height-172,w-36,23),"MENSAJE PARA BB–8",UITheme.Kicker);
+            GUI.SetNextControlName("utterance");typed=GUI.TextField(new Rect(x+18,height-140,w-135,44),typed,600,UITheme.Field);GUI.FocusControl("utterance");
+            if(GUI.Button(new Rect(x+w-103,height-140,85,44),"ENVIAR",UITheme.Primary))SubmitText();
+            GUI.Label(new Rect(x+18,height-88,w-36,22),"Enter envía · Esc cierra · Prueba «sígueme» o «aléjate»",UITheme.Small);
+        }else{
+            string prompt=Voice.Ready&&!Voice.Busy&&!Voice.Recording?"E  Mantén para hablar    /    T  Escribe a BB–8":Voice.Status;
+            if(Popup&&Popup.Visible&&!string.IsNullOrEmpty(Voice.Transcript))prompt="“"+Voice.Transcript+"”";
+            UITheme.Panel(new Rect(x,height-123,w,56));GUI.Label(new Rect(x+18,height-112,w-36,40),prompt,UITheme.Body);
+            if(!Voice.Ready&&!Voice.Busy&&GUI.Button(new Rect(width-168,100,144,34),"REINTENTAR VOZ",UITheme.Button))Voice.Retry();
         }
-        if(Popup && Popup.Visible && !string.IsNullOrEmpty(Voice.Transcript)){GUI.Box(new Rect(width/2f-w/2,height-174,w,54),GUIContent.none);GUI.Label(new Rect(width/2f-w/2+12,height-168,w-24,46),"“"+Voice.Transcript+"”",label);}
-        GUI.Label(new Rect(24,height-32,width-48,25),"TAB personaje   ·   V vista   ·   E mantener para hablar   ·   T escribir   ·   F3 diagnóstico",label);
+        if(ControlBB8){
+            UITheme.Panel(new Rect(24,height-135,210,68));
+            GUI.Label(new Rect(40,height-127,180,22),"IMPULSO   "+Mathf.RoundToInt(BB8.Battery*100)+"%",UITheme.Kicker);
+            UITheme.Fill(new Rect(40,height-99,178,4),UITheme.Line);
+            UITheme.Fill(new Rect(40,height-99,178*BB8.Battery,4),BB8.Battery<.15f?new Color(.94f,.62f,.29f):UITheme.Accent);
+            GUI.Label(new Rect(40,height-87,180,18),"Shift · Celdas para recargar",UITheme.Small);
+        }
+        GUI.Label(new Rect(24,height-39,width-48,22),"W / S avanzar   ·   A / D girar   ·   Espacio saltar   ·   Tab personaje   ·   V vista   ·   Mouse derecho mirar   ·   Esc menú",UITheme.Small);
         if(diagnostic){
-            GUI.Box(new Rect(width-330,90,310,168),GUIContent.none);
-            var r=Voice.LastResult;
-            GUI.Label(new Rect(width-315,102,280,100),r==null?"Aún no hay una interpretación.":"Interpretación del texto (estimación)\n"+r.emotion+" / "+r.attitude+"\nIntensidad: "+r.intensity+" · "+r.seconds.ToString("0.0")+" s\nReacción: "+r.reaction,label);
+            UITheme.Panel(new Rect(width-340,108,316,175));var r=Voice.LastResult;
+            GUI.Label(new Rect(width-324,121,285,90),r==null?"Sin interpretación todavía.":r.emotion+" / "+r.attitude+"\nIntensidad "+r.intensity+" · "+r.seconds.ToString("0.0")+" s\n"+r.reaction,UITheme.Body);
             var devices=Microphone.devices;
-            if(GUI.Button(new Rect(width-315,203,280,28),devices.Length==0?"Sin micrófono":"Mic: "+devices[Mathf.Clamp(Voice.MicrophoneIndex,0,devices.Length-1)])&&!Voice.Recording)Voice.MicrophoneIndex=(Voice.MicrophoneIndex+1)%Mathf.Max(1,devices.Length);
-            for(int level=1;level<=3;level++){
-                if(GUI.Button(new Rect(width-315+(level-1)*94,235,90,22),"Alegría "+level)&&!Voice.Busy&&!Brain.Busy)Brain.React("celebrate",level,"friendly");
-            }
+            if(GUI.Button(new Rect(width-324,209,284,28),devices.Length==0?"Sin micrófono":devices[Mathf.Clamp(Voice.MicrophoneIndex,0,devices.Length-1)],UITheme.Button)&&!Voice.Recording)Voice.MicrophoneIndex=(Voice.MicrophoneIndex+1)%Mathf.Max(1,devices.Length);
+            for(int level=1;level<=3;level++)if(GUI.Button(new Rect(width-324+(level-1)*96,245,92,24),"Alegría "+level,UITheme.Button)&&!Voice.Busy&&!Brain.Busy)Brain.React("celebrate",level,"friendly");
         }
         GUI.matrix=previousMatrix;
     }

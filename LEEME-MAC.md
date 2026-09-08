@@ -16,7 +16,7 @@ La escena principal es `Assets/scrapyard.unity`. La antigua pista de prueba se c
 | --- | --- |
 | W / S | Avanzar / retroceder |
 | A / D | Girar; la cámara acompaña el giro |
-| Mouse | Mirar alrededor; al desplazarte la cámara vuelve suavemente al frente |
+| Mouse derecho + mover | Mirar alrededor; al desplazarte la cámara vuelve suavemente al frente |
 | Rueda | Acercar o alejar |
 | Espacio | Saltar; pausa de 0,65 segundos entre saltos |
 | Shift + dirección | Turbo, hasta 1,4 segundos por ráfaga |
@@ -48,7 +48,7 @@ Rama de esta versión: `local-conversation`.
 
 ## Conversación local y Minion
 
-La escena comienza controlando al Minion. **Tab** alterna el control y la cámara entre Minion y BB-8. **V** alterna primera / tercera persona. Ambos avanzan con W, retroceden con S, giran con A/D y saltan con espacio; Shift mantiene el turbo de BB-8. El giro funciona también sin avanzar. La cámara sigue la dirección del personaje, sin usar la rotación de la esfera de BB-8; después de mirar con el mouse deja una pausa breve antes de acompañar otra vez el movimiento.
+La bienvenida presenta los controles antes de entrar. El sonido comienza desactivado; puedes habilitarlo en el menú. **Esc** fuera del campo de texto abre el menú y pausa. Al entrar controlas al Minion, con BB-8 visible frente a él. **Tab** alterna el personaje y **V** alterna primera / tercera persona. W/S avanza/retrocede, A/D gira y espacio salta; Shift mantiene el turbo de BB-8. **H** hace saludar al Minion. La cámara sigue la dirección del personaje; mantén el botón derecho del mouse para mirar alrededor. El menú permite desactivar el seguimiento automático. El campo de visión es fijo y no hay sacudidas de cámara.
 
 Mantén **E**, habla en español y suelta para que BB-8 reaccione. La primera vez, permite el micrófono en el diálogo de macOS; si soltaste E durante ese diálogo, vuelve a mantenerlo. Máximo 15 segundos por intervención. El sonido de la escena se silencia durante la grabación para evitar que el propio droide se transcriba. Cambiar de aplicación cancela la grabación.
 

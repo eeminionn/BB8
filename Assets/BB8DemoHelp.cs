@@ -16,6 +16,7 @@ public sealed class BB8DemoHelp : MonoBehaviour
     }
     void OnGUI()
     {
+        if(ExperienceShell.Instance)return;
         if (small == null)
         {
             small = new GUIStyle(GUI.skin.label) { fontSize = 12, normal = { textColor = new Color(0.72f, 0.79f, 0.79f) } };
