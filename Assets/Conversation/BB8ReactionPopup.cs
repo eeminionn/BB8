@@ -6,9 +6,11 @@ public sealed class BB8ReactionPopup : MonoBehaviour
     public bool Visible => Time.time < expires;
     public string Feeling { get; private set; }
     BB8SocialBrain brain;
-    string words;
     float expires=-1, shown, displayed=.5f;
-    GUIStyle speech, feeling, small;
+    Transform bubble, marker;
+    TextMesh caption;
+    Material panelMaterial, barMaterial, markerMaterial, textMaterial;
+    Texture2D gradient;
 
     public void Initialize(BB8SocialBrain value)
     {
@@ -17,7 +19,7 @@ public sealed class BB8ReactionPopup : MonoBehaviour
     }
     void Show(SocialReaction profile,int level,string attitude)
     {
-        words=profile.Words(level);Feeling=profile.Feeling(level);
+        Feeling=profile.Feeling(level);
         float change=attitude=="hostile" || profile.Id=="retreat" ? -.16f*level
             : profile.Id=="celebrate" ? .12f*level
             : attitude=="friendly" || attitude=="seeking_comfort" ? .05f*level
@@ -27,41 +29,67 @@ public sealed class BB8ReactionPopup : MonoBehaviour
     }
     public void ShowCommand(string command)
     {
-        words=command=="follow"?"Beep-boop!":"Boop-beep!";Feeling="Entendido";
+        Feeling="Entendido";
         shown=Time.time;expires=shown+4f;
     }
-    void Update(){displayed=Mathf.MoveTowards(displayed,Affinity,Time.deltaTime*.35f);}
-    void OnGUI()
+    void Start()
     {
-        if(!Visible)return;
-        float scale=Mathf.Max(.75f,Screen.height/900f), width=Screen.width/scale;
-        var matrix=GUI.matrix;var color=GUI.color;GUI.matrix=Matrix4x4.Scale(Vector3.one*scale);
-        if(speech==null){
-            speech=new GUIStyle(GUI.skin.label){fontSize=23,fontStyle=FontStyle.Bold,wordWrap=true,normal={textColor=Color.white}};
-            feeling=new GUIStyle(speech){fontSize=19};
-            small=new GUIStyle(GUI.skin.label){fontSize=11,normal={textColor=new Color(.73f,.83f,.85f)}};
-        }
-        float alpha=Mathf.Min(Mathf.Clamp01((Time.time-shown)/.18f),Mathf.Clamp01((expires-Time.time)/.6f));
-        float w=Mathf.Min(350,width-40),x=width-w-25,y=265;
-        Fill(new Rect(x,y,w,170),new Color(.025f,.07f,.09f,.94f),alpha);
-        Fill(new Rect(x,y,4,170),new Color(.35f,.87f,.94f),alpha);
-        GUI.color=new Color(1,1,1,alpha);
-        GUI.Label(new Rect(x+18,y+10,w-36,19),"BB-8",small);
-        GUI.Label(new Rect(x+18,y+31,w-36,57),words,speech);
-        GUI.Label(new Rect(x+18,y+91,w-36,27),Feeling,feeling);
-        float barX=x+18,barY=y+126,barW=w-36;
+        bubble=new GameObject("BB8 · emoción").transform;
+        bubble.gameObject.layer=8;
+        var shader=Resources.Load<Shader>("BB8WorldPopup");
+        panelMaterial=new Material(shader){color=new Color(.025f,.07f,.09f,.92f)};
+        barMaterial=new Material(shader);
+        markerMaterial=new Material(shader){color=Color.white};
+        gradient=new Texture2D(48,1){wrapMode=TextureWrapMode.Clamp};
         for(int i=0;i<48;i++){
             float u=i/47f;
-            var c=u<.5f?Color.Lerp(new Color(.2f,.85f,.45f),new Color(1,.8f,.25f),u*2):Color.Lerp(new Color(1,.8f,.25f),new Color(.95f,.24f,.22f),(u-.5f)*2);
-            Fill(new Rect(barX+barW*i/48f,barY,barW/48f+1,8),c,alpha);
+            gradient.SetPixel(i,0,u<.5f?Color.Lerp(new Color(.2f,.85f,.45f),new Color(1,.8f,.25f),u*2):Color.Lerp(new Color(1,.8f,.25f),new Color(.95f,.24f,.22f),(u-.5f)*2));
         }
-        Fill(new Rect(barX+(1-displayed)*(barW-4),barY-4,4,16),Color.white,alpha);
-        GUI.color=new Color(1,1,1,alpha);
-        GUI.Label(new Rect(barX,barY+16,110,18),"LE GUSTA",small);
-        var previous=small.alignment;small.alignment=TextAnchor.UpperRight;
-        GUI.Label(new Rect(barX+barW-130,barY+16,130,18),"NO LE GUSTA",small);small.alignment=previous;
-        GUI.color=color;GUI.matrix=matrix;
+        gradient.Apply();barMaterial.mainTexture=gradient;
+        Quad("Panel",Vector3.zero,new Vector3(1.55f,.49f,1),panelMaterial);
+        Quad("Afinidad",new Vector3(0,-.135f,-.015f),new Vector3(1.27f,.045f,1),barMaterial);
+        marker=Quad("Indicador",new Vector3(0,-.135f,-.025f),new Vector3(.025f,.095f,1),markerMaterial);
+        caption=new GameObject("Emoción").AddComponent<TextMesh>();
+        caption.transform.SetParent(bubble,false);caption.transform.localPosition=new Vector3(0,.055f,-.02f);
+        caption.font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        caption.fontSize=64;caption.characterSize=.026f;caption.anchor=TextAnchor.MiddleCenter;
+        caption.alignment=TextAlignment.Center;caption.color=Color.white;
+        textMaterial=new Material(shader){mainTexture=caption.font.material.mainTexture};
+        textMaterial.SetFloat("_Font",1);
+        caption.GetComponent<MeshRenderer>().sharedMaterial=textMaterial;
+        bubble.gameObject.SetActive(false);
     }
-    static void Fill(Rect rect,Color color,float alpha){color.a*=alpha;GUI.color=color;GUI.DrawTexture(rect,Texture2D.whiteTexture);}
-    void OnDestroy(){if(brain)brain.ReactionStarted-=Show;}
+    Transform Quad(string title,Vector3 position,Vector3 scale,Material material)
+    {
+        var go=GameObject.CreatePrimitive(PrimitiveType.Quad);Destroy(go.GetComponent<Collider>());
+        go.name=title;go.layer=8;go.transform.SetParent(bubble,false);
+        go.transform.localPosition=position;go.transform.localScale=scale;
+        go.GetComponent<MeshRenderer>().sharedMaterial=material;
+        return go.transform;
+    }
+    void LateUpdate()
+    {
+        displayed=Mathf.MoveTowards(displayed,Affinity,Time.deltaTime*.35f);
+        if(!bubble)return;
+        var camera=Camera.main;
+        bool show=Visible&&brain&&camera;
+        if(show){
+            var orbit=camera.GetComponent<DragMouseOrbit>();
+            show=!(orbit&&orbit.FirstPerson&&orbit.Target==brain.transform);
+        }
+        bubble.gameObject.SetActive(show);
+        if(!show)return;
+        bubble.position=brain.transform.position+Vector3.up*1.85f;
+        bubble.rotation=camera.transform.rotation;
+        caption.text=Feeling;
+        marker.localPosition=new Vector3((.5f-displayed)*1.245f,-.135f,-.025f);
+        float alpha=Mathf.Min(Mathf.Clamp01((Time.time-shown)/.18f),Mathf.Clamp01((expires-Time.time)/.6f));
+        panelMaterial.color=new Color(.025f,.07f,.09f,.92f*alpha);
+        barMaterial.color=markerMaterial.color=textMaterial.color=new Color(1,1,1,alpha);
+    }
+    void OnDestroy(){
+        if(brain)brain.ReactionStarted-=Show;
+        if(bubble)Destroy(bubble.gameObject);
+        Destroy(panelMaterial);Destroy(barMaterial);Destroy(markerMaterial);Destroy(textMaterial);Destroy(gradient);
+    }
 }

@@ -29,11 +29,9 @@ public sealed class ConversationDirector : MonoBehaviour
     }
     void Update(){
         if(Input.GetKeyDown(KeyCode.F3))diagnostic=!diagnostic;
-        if(Input.GetKeyDown(KeyCode.Escape))Typing=false;
         if(!Typing){
             if(Input.GetKeyDown(KeyCode.Tab))SwitchCharacter();
             if(Input.GetKeyDown(KeyCode.V))SwitchPOV();
-            if(Input.GetKeyUp(KeyCode.T)&&!Voice.Busy&&!Voice.Recording)Typing=true;
             if(Input.GetKeyDown(KeyCode.E)&&!Brain.Busy)Voice.BeginRecording();
         }
         bool conversational=Voice.Busy||Voice.Recording||Brain.Busy;
@@ -44,6 +42,17 @@ public sealed class ConversationDirector : MonoBehaviour
         View.SuspendInput=Typing;
     }
     void OnGUI(){
+        // Handle shortcuts before TextField consumes Return.
+        var e=Event.current;
+        if(e.keyCode==KeyCode.None && (e.character=='t'||e.character=='T'))e.Use();
+        if(e.keyCode==KeyCode.T && (e.type==EventType.KeyDown||e.type==EventType.KeyUp)){
+            if(e.type==EventType.KeyDown && (Typing||(!Voice.Busy&&!Voice.Recording)))Typing=!Typing;
+            e.Use();
+        }
+        if(Typing && e.type==EventType.KeyDown){
+            if(e.keyCode==KeyCode.Escape){Typing=false;e.Use();}
+            else if(e.keyCode==KeyCode.Return||e.keyCode==KeyCode.KeypadEnter){SubmitText();e.Use();}
+        }
         var previousMatrix=GUI.matrix;
         float scale=Mathf.Max(.75f,Screen.height/900f),width=Screen.width/scale,height=Screen.height/scale;
         GUI.matrix=Matrix4x4.Scale(Vector3.one*scale);
@@ -54,7 +63,7 @@ public sealed class ConversationDirector : MonoBehaviour
         GUI.Label(new Rect(34,122,w-28,46),Voice.Status,label);
         if(!Voice.Ready&&!Voice.Busy&&GUI.Button(new Rect(34,156,110,24),"Reintentar"))Voice.Retry();
         if(Typing){GUI.SetNextControlName("utterance");typed=GUI.TextField(new Rect(34,166,w-128,28),typed,600);GUI.FocusControl("utterance");
-            if(GUI.Button(new Rect(w-84,166,90,28),"Enviar") || Event.current.type==EventType.KeyDown&&Event.current.keyCode==KeyCode.Return){Voice.SendText(typed);typed="";Typing=false;Event.current.Use();}
+            if(GUI.Button(new Rect(w-84,166,90,28),"Enviar"))SubmitText();
         }
         if(Popup && Popup.Visible && !string.IsNullOrEmpty(Voice.Transcript)){GUI.Box(new Rect(width/2f-w/2,height-174,w,54),GUIContent.none);GUI.Label(new Rect(width/2f-w/2+12,height-168,w-24,46),"“"+Voice.Transcript+"”",label);}
         GUI.Label(new Rect(24,height-32,width-48,25),"TAB personaje   ·   V vista   ·   E mantener para hablar   ·   T escribir   ·   F3 diagnóstico",label);
@@ -69,6 +78,10 @@ public sealed class ConversationDirector : MonoBehaviour
             }
         }
         GUI.matrix=previousMatrix;
+    }
+    void SubmitText(){
+        if(!Voice.Ready||Voice.Busy||Voice.Recording||string.IsNullOrWhiteSpace(typed))return;
+        Voice.SendText(typed);typed="";Typing=false;GUI.FocusControl(null);
     }
     void OnDestroy(){if(Voice)Voice.Result-=React;foreach(var r in hidden)if(r)r.enabled=true;}
 }
