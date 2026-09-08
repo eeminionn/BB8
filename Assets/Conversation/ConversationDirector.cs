@@ -10,6 +10,7 @@ public sealed class ConversationDirector : MonoBehaviour
     public bool ControlBB8 { get; private set; }
     public bool Typing { get; private set; }
     bool diagnostic;
+    bool suppressOpeningT;
     string typed="";
     Renderer[] hidden=new Renderer[0];
     GUIStyle label,title;
@@ -44,9 +45,12 @@ public sealed class ConversationDirector : MonoBehaviour
     void OnGUI(){
         // Handle shortcuts before TextField consumes Return.
         var e=Event.current;
-        if(e.keyCode==KeyCode.None && (e.character=='t'||e.character=='T'))e.Use();
-        if(e.keyCode==KeyCode.T && (e.type==EventType.KeyDown||e.type==EventType.KeyUp)){
-            if(e.type==EventType.KeyDown && (Typing||(!Voice.Busy&&!Voice.Recording)))Typing=!Typing;
+        if(suppressOpeningT && e.keyCode==KeyCode.None && (e.character=='t'||e.character=='T')){
+            suppressOpeningT=false;e.Use();
+        }
+        if(e.type==EventType.KeyUp && e.keyCode==KeyCode.T)suppressOpeningT=false;
+        if(!Typing && e.keyCode==KeyCode.T && e.type==EventType.KeyDown){
+            if(!Voice.Busy&&!Voice.Recording){Typing=true;suppressOpeningT=true;}
             e.Use();
         }
         if(Typing && e.type==EventType.KeyDown){
