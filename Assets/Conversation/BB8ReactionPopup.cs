@@ -32,6 +32,7 @@ public sealed class BB8ReactionPopup : MonoBehaviour
         Feeling="Entendido";
         shown=Time.time;expires=shown+4f;
     }
+    public void Hide(){expires=-1;}
     void Start()
     {
         bubble=new GameObject("BB8 · emoción").transform;

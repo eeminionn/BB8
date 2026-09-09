@@ -74,3 +74,10 @@ Di **«sígueme»** manteniendo E o escríbelo con T: BB-8 seguirá al Minion co
 Di **«aléjate»** para cancelar el seguimiento y retirarse unos seis metros. Se detiene al llegar o tras ocho segundos si el camino está bloqueado. Tab al tomar el control de BB-8 cancela la orden. Las órdenes aceptan tildes y «por favor», confirman con un beep y «Entendido», y no cambian la afinidad.
 
 El movimiento usa colisiones, detección de bordes y desvíos locales ante obstáculos. No planifica rutas completas por laberintos ni salta huecos automáticamente.
+# Destinos
+
+El menú galáctico permite seleccionar **Khepra — Puesto 08** (desguace espacial) o **Tierra — Distrito Central** (barrio urbano con plaza, comercios, edificios, árboles, bancos, parada de bus, cruces peatonales y autos estacionados). Elige con clic o con las flechas izquierda/derecha y pulsa **Enter** para viajar. Esc vuelve al mapa actual sin aplicar una selección pendiente.
+
+Puedes cambiar de destino desde la pausa. Los personajes reaparecen en un punto seguro, se cancelan las órdenes de movimiento anteriores y se conserva la afinidad y el servicio de conversación. Si BB-8 está procesando una frase, espera a que termine antes de cambiar de mapa. La Tierra incluye dos puntos de recarga junto a la plaza; el entorno urbano no simula tráfico ni peatones todavía.
+
+La estética del menú usa un campo estelar, tipografía de consola, oro y azul de navegación. No tiene música y el sonido inicia desactivado. Se conserva la cámara de escritorio y la futura integración VR sigue siendo una etapa independiente.

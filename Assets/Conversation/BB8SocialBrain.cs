@@ -44,6 +44,7 @@ public sealed class BB8SocialBrain : MonoBehaviour
         if(Autonomous)body.linearVelocity=Vector3.Project(body.linearVelocity,Vector3.up);
         following=leaving=false;motor.SetInput(Vector2.zero,false,false);
     }
+    public void CancelInteraction(){CancelCommand();Busy=false;Listening=false;personality.SocialSpeaking=false;personality.SocialAntenna=0;personality.SocialHeadPose=Vector3.zero;GetComponent<AudioSource>().Stop();}
     bool SafeDirection(Vector3 direction,float distance)
     {
         return !Physics.SphereCast(body.position+Vector3.up*.08f,.43f,direction,out _,distance,EnvironmentMask,QueryTriggerInteraction.Ignore)

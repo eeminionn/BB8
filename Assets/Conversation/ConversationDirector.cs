@@ -63,7 +63,7 @@ public sealed class ConversationDirector : MonoBehaviour
         float scale=Mathf.Max(.65f,Mathf.Min(Screen.height/900f,Screen.width/1280f)),width=Screen.width/scale,height=Screen.height/scale;
         GUI.matrix=Matrix4x4.Scale(Vector3.one*scale);
         UITheme.Panel(new Rect(24,24,300,64));
-        GUI.Label(new Rect(40,32,265,22),"BB–8    /    DESGUACE 08",UITheme.Kicker);
+        GUI.Label(new Rect(40,32,275,22),WorldDestinations.Instance?WorldDestinations.Instance.AreaLabel:"KHEPRA / PUESTO 08",UITheme.Kicker);
         GUI.Label(new Rect(40,57,265,20),(ControlBB8?"BB–8":"MINION")+"   ·   "+(View.FirstPerson?"Primera persona":"Tercera persona"),UITheme.Small);
         string state=Voice.Recording?"ESCUCHANDO":Voice.Busy?(Voice.Ready?"PREPARANDO RESPUESTA":"INICIANDO VOZ"):Voice.Ready?"VOZ LISTA":"VOZ NO DISPONIBLE";
         UITheme.Panel(new Rect(width-270,24,246,64));
@@ -89,7 +89,8 @@ public sealed class ConversationDirector : MonoBehaviour
             UITheme.Fill(new Rect(40,height-99,178*BB8.Battery,4),BB8.Battery<.15f?new Color(.94f,.62f,.29f):UITheme.Accent);
             GUI.Label(new Rect(40,height-87,180,18),"Shift · Celdas para recargar",UITheme.Small);
         }
-        GUI.Label(new Rect(24,height-39,width-48,22),"W / S avanzar   ·   A / D girar   ·   Espacio saltar   ·   Tab personaje   ·   V vista   ·   Mouse derecho mirar   ·   Esc menú",UITheme.Small);
+        UITheme.Fill(new Rect(0,height-48,width,48),new Color(.018f,.029f,.038f,.9f));
+        GUI.Label(new Rect(24,height-35,width-48,22),"W / S avanzar   ·   A / D girar   ·   Espacio saltar   ·   Tab personaje   ·   V vista   ·   Mouse derecho mirar   ·   Esc menú",UITheme.Small);
         if(diagnostic){
             UITheme.Panel(new Rect(width-340,108,316,175));var r=Voice.LastResult;
             GUI.Label(new Rect(width-324,121,285,90),r==null?"Sin interpretación todavía.":r.emotion+" / "+r.attitude+"\nIntensidad "+r.intensity+" · "+r.seconds.ToString("0.0")+" s\n"+r.reaction,UITheme.Body);

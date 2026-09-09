@@ -56,6 +56,7 @@ public class BbRigidbodyController : MonoBehaviour
     }
 
     // Shared input boundary also allows repeatable physics checks in the editor.
+    public void ResetHeading(Vector3 direction){FacingDirection=direction.normalized;Steering=false;SetInput(Vector2.zero,false,false);}
     public void SetInput(Vector2 movement, bool jump, bool boost)
     {
         moveInput = Vector2.ClampMagnitude(movement, 1f);

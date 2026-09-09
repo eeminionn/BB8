@@ -32,6 +32,7 @@ public sealed class MinionController : MonoBehaviour
         Drive(input,Controlled&&Input.GetButtonDown("Jump"),Time.deltaTime);
     }
     public void Wave(){waveUntil=Time.time+1.8f;}
+    public void Reposition(Vector3 position,float heading){motor.enabled=false;transform.SetPositionAndRotation(position,Quaternion.Euler(0,heading,0));motor.enabled=true;spawn=position;vertical=speed=blend=0;Grounded=false;lastGround=jumpUntil=-10;}
     public void Drive(Vector2 input,bool jump,float dt){
         if(!motor.enabled||dt<=0)return;
         bool wasGrounded=Grounded;

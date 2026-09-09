@@ -11,6 +11,7 @@ public class DragMouseOrbit:MonoBehaviour
     Transform previousTarget;
     bool previousPOV;
     Camera view;
+    public void ResetFraming(){previousTarget=null;focusVelocity=Vector3.zero;}
     void Start(){view=GetComponent<Camera>();actualDistance=Distance;yaw=transform.eulerAngles.y;pitch=14;}
     void LateUpdate(){
         if(!Target)return;
