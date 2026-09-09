@@ -11,3 +11,11 @@ El cambio de mapa conserva las instancias de los personajes, el servicio de voz 
 Se compiló la aplicación macOS y se revisaron visualmente el selector, el globo terrestre, la plaza urbana, los rótulos, el punto de llegada y el contraste del HUD. Todas las pruebas se realizaron con sonido desactivado.
 
 La aplicación abre el menú con sonido apagado. Flechas izquierda/derecha o clic seleccionan destino, Enter viaja y Esc vuelve al entorno actual sin aplicar una selección pendiente. La integración de visor y mandos VR sigue fuera de esta entrega.
+
+## Giro de los planetas
+
+Los globos se renderizan en una textura de 512 × 512 mediante un shader que gira la superficie alrededor del eje norte-sur, con iluminación y silueta fijas. El reloj es independiente de la pausa; la vuelta dura 60 segundos. El recurso gráfico se reutiliza entre destinos y se libera al cerrar la interfaz. Tierra muestra la descripción «Planeta Tierra».
+
+`BB8 > Verify Rotating Planets` compara imágenes renderizadas a 0, 15 y 60 segundos con `Time.timeScale = 0`. Para ambos destinos se comprobó cambio visible de superficie, silueta invariable, vuelta completa sin salto y transparencia correcta. Resultado en `Logs/planet-preview-verification.txt`. Las pruebas se ejecutaron con audio desactivado.
+
+La compilación macOS se revisó con ambos destinos seleccionados y el menú abierto durante varias vueltas: continentes y terreno giran, la interfaz conserva su composición y la descripción de Tierra es breve. La previsualización se actualiza antes del dibujo de la interfaz y solo cuando el menú está abierto.

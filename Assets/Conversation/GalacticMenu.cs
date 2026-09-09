@@ -5,8 +5,15 @@ public sealed class GalacticMenu
     static readonly Color Gold=new Color(.92f,.79f,.38f),Blue=new Color(.35f,.62f,.75f),Dim=new Color(.28f,.36f,.4f);
     GUIStyle logo,title,small,body,nav,eyebrow;
     Vector3[] stars;
-    Texture2D[] planets;
+    MenuPlanetRenderer planet;
+    Texture planetPreview;
+    double previewStarted;
     Texture2D dot;
+    public void Tick(int destination){
+        if(planet==null){planet=new MenuPlanetRenderer();previewStarted=Time.realtimeSinceStartupAsDouble;}
+        // Blit before IMGUI starts collecting draw commands, never inside OnGUI.
+        planetPreview=planet.Render(destination,Time.realtimeSinceStartupAsDouble-previewStarted);
+    }
     void Init(){
         if(logo!=null)return;var heading=Resources.Load<Font>("Fonts/Anton-Regular");var text=Resources.Load<Font>("Fonts/Rajdhani-Medium");
         logo=new GUIStyle(GUI.skin.label){font=heading,fontSize=105,normal={textColor=Gold},padding=new RectOffset(),alignment=TextAnchor.UpperLeft};
@@ -15,7 +22,6 @@ public sealed class GalacticMenu
         small=new GUIStyle(body){fontSize=16,normal={textColor=new Color(.53f,.64f,.69f)}};
         eyebrow=new GUIStyle(body){fontSize=17,normal={textColor=Gold}};
         var random=new System.Random(808);stars=new Vector3[360];for(int i=0;i<stars.Length;i++)stars[i]=new Vector3((float)random.NextDouble(),(float)random.NextDouble(),(float)random.NextDouble());
-        planets=new[]{Resources.Load<Texture2D>("KhepraPreview"),Resources.Load<Texture2D>("EarthPreview")};
         dot=new Texture2D(16,16);for(int y=0;y<16;y++)for(int x=0;x<16;x++){float r=Vector2.Distance(new Vector2(x,y),new Vector2(7.5f,7.5f))/8;dot.SetPixel(x,y,new Color(1,1,1,Mathf.Pow(Mathf.Clamp01(1-r),3)));}dot.Apply();
     }
     public static Texture2D CreatePlanet(bool earth){
@@ -71,10 +77,10 @@ public sealed class GalacticMenu
             float angle=i*Mathf.PI*2/100;var d=new Vector2(Mathf.Cos(angle),Mathf.Sin(angle));
             Line(center+d*(radius+18),center+d*(radius+(i%5==0?27:21)),i%5==0?Blue:Dim);
         }
-        if(Event.current.type==EventType.Repaint)GUI.DrawTexture(new Rect(center.x-radius,center.y-radius,radius*2,radius*2),planets[selected]);
+        if(Event.current.type==EventType.Repaint&&planetPreview)GUI.DrawTexture(new Rect(center.x-radius,center.y-radius,radius*2,radius*2),planetPreview);
         Line(new Vector2(670,566),new Vector2(1160,566),Dim);
         title.normal.textColor=Gold;GUI.Label(new Rect(680,577,480,55),selected==0?"KHEPRA":"TIERRA",title);
-        GUI.Label(new Rect(680,638,470,66),selected==0?"Un puesto de recuperación entre dunas,\nrestos de naves y rutas de chatarra.":"Un barrio cotidiano con plaza, comercios,\nveredas y cruces peatonales.",body);
+        GUI.Label(new Rect(680,638,470,66),selected==0?"Un puesto de recuperación entre dunas,\nrestos de naves y rutas de chatarra.":"Planeta Tierra.",body);
         string action=shell.HasEntered&&WorldDestinations.Instance&&selected==WorldDestinations.Instance.ActiveIndex?"CONTINUAR ENCUENTRO":"VIAJAR A "+(selected==0?"KHEPRA":"LA TIERRA");
         if(Action(new Rect(82,578,440,55),action,true))shell.Enter();
         if(Action(new Rect(82,652,212,40),shell.Muted?"SONIDO: APAGADO":"SONIDO: ENCENDIDO"))shell.ToggleSound();
@@ -88,5 +94,5 @@ public sealed class GalacticMenu
         GUI.Label(new Rect(1005,836,220,27),"VOZ LOCAL  ·  SIN COSTO",small);
         GUI.matrix=old;
     }
-    public void Dispose(){if(dot)Object.Destroy(dot);}
+    public void Dispose(){planet?.Dispose();if(dot)Object.Destroy(dot);}
 }
