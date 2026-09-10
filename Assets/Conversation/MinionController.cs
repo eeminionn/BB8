@@ -27,6 +27,7 @@ public sealed class MinionController : MonoBehaviour
         }
     }
     void Update(){
+        if(QuestInput.Active){Step(Controlled?QuestInput.Movement:Vector2.zero,Controlled&&QuestInput.JumpPressed,Time.deltaTime,true);return;}
         var input=Controlled?Vector2.ClampMagnitude(new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical")),1):Vector2.zero;
         if(Controlled&&Input.GetKeyDown(KeyCode.H))Wave();
         Drive(input,Controlled&&Input.GetButtonDown("Jump"),Time.deltaTime);
@@ -34,6 +35,9 @@ public sealed class MinionController : MonoBehaviour
     public void Wave(){waveUntil=Time.time+1.8f;}
     public void Reposition(Vector3 position,float heading){motor.enabled=false;transform.SetPositionAndRotation(position,Quaternion.Euler(0,heading,0));motor.enabled=true;spawn=position;vertical=speed=blend=0;Grounded=false;lastGround=jumpUntil=-10;}
     public void Drive(Vector2 input,bool jump,float dt){
+        Step(input,jump,dt,false);
+    }
+    void Step(Vector2 input,bool jump,float dt,bool relative){
         if(!motor.enabled||dt<=0)return;
         bool wasGrounded=Grounded;
         Grounded=motor.isGrounded||(vertical<=0&&Physics.SphereCast(transform.position+Vector3.up*.24f,.20f,Vector3.down,out _,.10f,GroundMask,QueryTriggerInteraction.Ignore));
@@ -41,10 +45,18 @@ public sealed class MinionController : MonoBehaviour
         if(jump)jumpUntil=Time.time+.12f;
         if(Time.time<jumpUntil&&Time.time-lastGround<.12f){vertical=5.5f;jumpUntil=-10;lastGround=-10;Grounded=false;}
         Steering=input.sqrMagnitude>.01f;
-        transform.Rotate(0,input.x*100f*dt,0,Space.World);
-        speed=Mathf.MoveTowards(speed,input.y*3.2f,dt*(Mathf.Abs(input.y)>.01f?8f:12f));
+        Vector3 direction=transform.forward;
+        float throttle=input.y;
+        if(relative){
+            var forward=Vector3.ProjectOnPlane(Camera.forward,Vector3.up).normalized;
+            direction=(forward*input.y+Vector3.Cross(Vector3.up,forward)*input.x).normalized;
+            throttle=input.magnitude;
+            if(direction.sqrMagnitude>.01f)transform.rotation=Quaternion.RotateTowards(transform.rotation,Quaternion.LookRotation(direction),360*dt);
+        }else transform.Rotate(0,input.x*100f*dt,0,Space.World);
+        if(!relative)direction=transform.forward;
+        speed=Mathf.MoveTowards(speed,throttle*3.2f,dt*(Mathf.Abs(throttle)>.01f?8f:12f));
         vertical=Mathf.Max(-22,vertical-20f*dt);
-        var flags=motor.Move((transform.forward*speed+Vector3.up*vertical)*dt);
+        var flags=motor.Move((direction*speed+Vector3.up*vertical)*dt);
         if((flags&CollisionFlags.Above)!=0&&vertical>0)vertical=0;
         if((flags&CollisionFlags.Below)!=0&&vertical<0){Grounded=true;vertical=-3;}
         float actualSpeed=Vector3.ProjectOnPlane(motor.velocity,Vector3.up).magnitude;

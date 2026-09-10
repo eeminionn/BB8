@@ -25,10 +25,12 @@ public sealed class LocalVoiceClient : MonoBehaviour
     float recordStart,oldVolume=1;
     System.Diagnostics.Process service;
     readonly List<string> history=new List<string>();
+    public string TalkHint => QuestInput.Active?"Mantén el gatillo derecho para hablar":"Mantén E para hablar con BB-8";
     void Start(){ StartCoroutine(Connect()); }
     public void Retry(){ if(!Busy && !Recording) StartCoroutine(Connect()); }
     IEnumerator Connect(){
         Ready=false; Busy=true; Status="Preparando voz local…";
+        if(QuestInput.Active){yield return ConnectQuest();Busy=false;yield break;}
         var installed=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal),"Library/Application Support/BB8Voice");
         if(Directory.Exists(Path.Combine(installed,".local-voice"))) project=installed;
         var root=new DirectoryInfo(Application.dataPath);
@@ -64,26 +66,51 @@ public sealed class LocalVoiceClient : MonoBehaviour
         Busy=false;
         if(!Ready && Status=="Preparando voz local…") Status="La voz tardó demasiado. Pulsa Reintentar.";
     }
+    IEnumerator ConnectQuest(){
+        var path=Path.Combine(Application.persistentDataPath,"quest-voice-token");
+        if(!File.Exists(path)){Status="Conecta el USB y abre Iniciar BB8 VR en el Mac.";yield break;}
+        token=File.ReadAllText(path).Trim();
+        using(var req=UnityWebRequest.Get(Url+"/health")){
+            req.timeout=3;yield return req.SendWebRequest();
+            if(req.result==UnityWebRequest.Result.Success){
+                var health=JsonUtility.FromJson<Health>(req.downloadHandler.text);
+                Ready=health.service=="bb8-local-voice"&&health.ready;
+                Status=Ready?TalkHint:"El Mac está preparando la voz…";
+                if(Ready)Debug.Log("BB8_QUEST_VOICE_READY");
+            }else Status="Voz desconectada. Conecta el USB y abre Iniciar BB8 VR.";
+        }
+    }
     public void BeginRecording(){if(Ready&&!Busy&&!Recording) StartCoroutine(Begin());}
     IEnumerator Begin(){
         Busy=true;
+#if UNITY_ANDROID && !UNITY_EDITOR
+        if(!UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.Microphone)){
+            bool answered=false;var callbacks=new UnityEngine.Android.PermissionCallbacks();
+            callbacks.PermissionGranted+=_=>answered=true;callbacks.PermissionDenied+=_=>answered=true;
+            UnityEngine.Android.Permission.RequestUserPermission(UnityEngine.Android.Permission.Microphone,callbacks);
+            float deadline=Time.realtimeSinceStartup+45;
+            while(!answered&&Time.realtimeSinceStartup<deadline)yield return null;
+        }
+        if(!UnityEngine.Android.Permission.HasUserAuthorizedPermission(UnityEngine.Android.Permission.Microphone)){Status="Permite el micrófono en los permisos de BB8 del visor.";Busy=false;yield break;}
+#else
         if(!Application.HasUserAuthorization(UserAuthorization.Microphone)) yield return Application.RequestUserAuthorization(UserAuthorization.Microphone);
         if(!Application.HasUserAuthorization(UserAuthorization.Microphone)){Status="Permite el micrófono en Ajustes del Sistema > Privacidad > Micrófono.";Busy=false;yield break;}
+#endif
         var devices=Microphone.devices;
         if(devices.Length==0){Status="No se detectó un micrófono.";Busy=false;yield break;}
-        if(!Input.GetKey(KeyCode.E)){Status="Mantén E mientras hablas.";Busy=false;yield break;}
+        if(!QuestInput.Talking){Status=TalkHint;Busy=false;yield break;}
         device=devices[Mathf.Clamp(MicrophoneIndex,0,devices.Length-1)];
         recording=Microphone.Start(device,false,15,16000);
         if(!recording){Status="No se pudo abrir el micrófono.";Busy=false;yield break;}
         oldVolume=AudioListener.volume;AudioListener.volume=0;
-        recordStart=Time.realtimeSinceStartup;Recording=true;Busy=false;Status="Te escucho… suelta E para responder";
+        recordStart=Time.realtimeSinceStartup;Recording=true;Busy=false;Status=QuestInput.Active?"Te escucho… suelta el gatillo para responder":"Te escucho… suelta E para responder";
     }
-    void Update(){if(Recording && (!Input.GetKey(KeyCode.E)||Time.realtimeSinceStartup-recordStart>14.7f)) EndRecording();}
+    void Update(){if(Recording && (!QuestInput.Talking||Time.realtimeSinceStartup-recordStart>14.7f)) EndRecording();}
     void OnApplicationFocus(bool focused){if(!focused && Recording) CancelRecording();}
     void CancelRecording(){if(!Recording)return;Microphone.End(device);Recording=false;AudioListener.volume=oldVolume;if(recording)Destroy(recording);Status="Grabación cancelada";}
     void EndRecording(){
         int count=Microphone.GetPosition(device);Microphone.End(device);Recording=false;AudioListener.volume=oldVolume;
-        if(count<recording.frequency*.3f){Destroy(recording);Status="Mantén E y habla durante al menos un segundo.";return;}
+        if(count<recording.frequency*.3f){Destroy(recording);Status="Habla durante al menos un segundo. "+TalkHint;return;}
         var samples=new float[count*recording.channels];recording.GetData(samples,0);
         var wav=Wav(samples,recording.frequency,recording.channels);Destroy(recording);
         StartCoroutine(Send(wav,false));
@@ -104,7 +131,7 @@ public sealed class LocalVoiceClient : MonoBehaviour
                 if(req.result==UnityWebRequest.Result.ConnectionError)Ready=false;
             }else{
                 LastResult=answer;Transcript=answer.text;history.Add(answer.text);if(history.Count>3)history.RemoveAt(0);
-                Status="Mantén E para hablar con BB-8";Result?.Invoke(answer);
+                Status=TalkHint;Result?.Invoke(answer);
             }
         }
         Busy=false;

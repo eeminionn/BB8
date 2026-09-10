@@ -45,6 +45,7 @@ public class BbRigidbodyController : MonoBehaviour
     void Update() {
         Steering=false;
         if(!AcceptPlayerInput)return;
+        if(QuestInput.Active){var move=QuestInput.Movement;Steering=move.sqrMagnitude>.01f;SetInput(move,QuestInput.JumpPressed,QuestInput.Boost.IsPressed());return;}
         Drive(new Vector2(Input.GetAxis("Horizontal"),Input.GetAxis("Vertical")),Input.GetButtonDown("Jump"),Input.GetKey(KeyCode.LeftShift)||Input.GetKey(KeyCode.RightShift),Time.deltaTime);
     }
     public void Drive(Vector2 input,bool jump,bool boost,float dt){

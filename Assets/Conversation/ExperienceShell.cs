@@ -16,7 +16,7 @@ public sealed class ExperienceShell:MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     static void QuietStart(){AudioListener.volume=0;AudioListener.pause=true;}
     void Awake(){Instance=this;director=GetComponent<ConversationDirector>();MenuOpen=!Application.isBatchMode;Time.timeScale=MenuOpen?0:1;}
-    void Update(){if(MenuOpen)menu.Tick(SelectedDestination);}
+    void Update(){if(MenuOpen&&!QuestInput.Active)menu.Tick(SelectedDestination);}
     void LateUpdate(){AudioListener.pause=Muted||MenuOpen;AudioListener.volume=Muted||MenuOpen||director.Voice.Recording?0:1;}
     public void SetMenu(bool open){MenuOpen=open;if(WorldDestinations.Instance)SelectedDestination=WorldDestinations.Instance.ActiveIndex;TravelStatus="";if(!open)HasEntered=true;Time.timeScale=open?0:1;Cursor.lockState=CursorLockMode.None;Cursor.visible=true;}
     public void Enter(){
@@ -24,6 +24,7 @@ public sealed class ExperienceShell:MonoBehaviour
         HasEntered=true;SetMenu(false);
     }
     void OnGUI(){
+        if(QuestInput.Active)return;
         if(Event.current.type==EventType.KeyDown&&Event.current.keyCode==KeyCode.Escape&&!director.Typing){SetMenu(!MenuOpen);Event.current.Use();}
         if(!MenuOpen)return;
         if(Event.current.type==EventType.KeyDown){

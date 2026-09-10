@@ -16,7 +16,7 @@ public class DragMouseOrbit:MonoBehaviour
     void LateUpdate(){
         if(!Target)return;
         // A future XR rig owns tracked head pose; this orbit camera is desktop-only.
-        if(UnityEngine.XR.XRSettings.enabled)return;
+        if(QuestInput.Active||UnityEngine.XR.XRSettings.enabled)return;
         float dt=Time.deltaTime;
         var motor=Target.GetComponent<BbRigidbodyController>();var minion=Target.GetComponent<MinionController>();
         var facing=motor?motor.FacingDirection:minion?minion.FacingDirection:Target.forward;

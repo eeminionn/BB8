@@ -1,5 +1,9 @@
 # Créditos y licencias
 
+## Integración Quest
+
+OpenXR Plugin 1.16.1, XR Plug-in Management y Input System proceden del registro oficial de Unity Package Manager. Sus licencias se conservan en los paquetes: Unity Companion License / Unity Package Distribution License según cada componente. La integración usa el perfil Oculus Touch y Meta Quest Support del paquete OpenXR, sin añadir servicios de pago.
+
 ## Minion
 
 [Minion - Character - Rigging](https://sketchfab.com/3d-models/minion-character-rigging-aac9063a39824178be43acb672a2e5bf) por [Cyber_Graphic3D / Olek.Jedynak](https://sketchfab.com/Olek.Jedynak), licencia [Creative Commons Attribution 4.0](https://creativecommons.org/licenses/by/4.0/). Descargado desde Sketchfab con la cuenta del usuario. Adaptaciones: escala, orientación, materiales para Unity, controlador y animación procedural del esqueleto. No se modificó el archivo FBX original. Minions es un personaje de sus respectivos titulares; la licencia indicada es la publicada por el creador del modelo.

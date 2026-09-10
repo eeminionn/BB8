@@ -80,4 +80,6 @@ El menú galáctico permite seleccionar **Khepra — Puesto 08** (desguace espac
 
 Puedes cambiar de destino desde la pausa. Los personajes reaparecen en un punto seguro, se cancelan las órdenes de movimiento anteriores y se conserva la afinidad y el servicio de conversación. Si BB-8 está procesando una frase, espera a que termine antes de cambiar de mapa. La Tierra incluye dos puntos de recarga junto a la plaza; el entorno urbano no simula tráfico ni peatones todavía.
 
-La estética del menú usa un campo estelar, tipografía de consola, oro y azul de navegación. Los planetas giran sobre su eje una vez por minuto, incluso mientras la simulación está en pausa; la iluminación permanece fija. No tiene música y el sonido inicia desactivado. Se conserva la cámara de escritorio y la futura integración VR sigue siendo una etapa independiente.
+La estética del menú usa un campo estelar, tipografía de consola, oro y azul de navegación. Los planetas giran sobre su eje una vez por minuto, incluso mientras la simulación está en pausa; la iluminación permanece fija. No tiene música y el sonido inicia desactivado. La versión de escritorio conserva sus controles y su cámara.
+
+La versión nativa para Quest 2 se describe en [LEEME-QUEST.md](LEEME-QUEST.md). El visor ejecuta el entorno y el Mac procesa la voz mediante USB. Para abrirla, usa **Iniciar BB8 VR.command**, junto a las aplicaciones compiladas.

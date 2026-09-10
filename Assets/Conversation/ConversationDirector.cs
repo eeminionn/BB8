@@ -14,7 +14,7 @@ public sealed class ConversationDirector : MonoBehaviour
     string typed="";
     Renderer[] hidden=new Renderer[0];
     public BB8ReactionPopup Popup { get; private set; }
-    void Start(){Popup=gameObject.AddComponent<BB8ReactionPopup>();Popup.Initialize(Brain);Voice.Result+=React;ApplyView();}
+    void Start(){Popup=gameObject.AddComponent<BB8ReactionPopup>();Popup.Initialize(Brain);Voice.Result+=React;if(QuestInput.Active){View.FirstPerson=true;gameObject.AddComponent<QuestExperience>();}ApplyView();}
     void React(VoiceResult result){if(Brain.ExecuteCommand(result.command))Popup.ShowCommand(result.command);else Brain.React(result.reaction,result.intensity,result.attitude);}
     public void SwitchCharacter(){ControlBB8=!ControlBB8;if(ControlBB8)Brain.CancelCommand();BB8.SetInput(Vector2.zero,false,false);ApplyView();}
     public void SwitchPOV(){View.FirstPerson=!View.FirstPerson;ApplyView();}
@@ -29,11 +29,11 @@ public sealed class ConversationDirector : MonoBehaviour
     }
     void Update(){
         if(ExperienceShell.Instance&&ExperienceShell.Instance.MenuOpen){BB8.AcceptPlayerInput=false;BB8.SetInput(Vector2.zero,false,false);Minion.Controlled=false;View.SuspendInput=true;return;}
-        if(Input.GetKeyDown(KeyCode.F3))diagnostic=!diagnostic;
+        if(!QuestInput.Active&&Input.GetKeyDown(KeyCode.F3))diagnostic=!diagnostic;
         if(!Typing){
-            if(Input.GetKeyDown(KeyCode.Tab))SwitchCharacter();
-            if(Input.GetKeyDown(KeyCode.V))SwitchPOV();
-            if(Input.GetKeyDown(KeyCode.E)&&!Brain.Busy)Voice.BeginRecording();
+            if(QuestInput.Active?QuestInput.Switch.WasPressedThisFrame():Input.GetKeyDown(KeyCode.Tab))SwitchCharacter();
+            if(!QuestInput.Active&&Input.GetKeyDown(KeyCode.V))SwitchPOV();
+            if((QuestInput.Active?QuestInput.Talk.WasPressedThisFrame():Input.GetKeyDown(KeyCode.E))&&!Brain.Busy)Voice.BeginRecording();
         }
         bool conversational=Voice.Busy||Voice.Recording||Brain.Busy;
         Brain.Listening=Voice.Ready&&(Voice.Busy||Voice.Recording);
@@ -44,6 +44,7 @@ public sealed class ConversationDirector : MonoBehaviour
         View.SuspendInput=Typing;
     }
     void OnGUI(){
+        if(QuestInput.Active)return;
         if(ExperienceShell.Instance&&ExperienceShell.Instance.MenuOpen)return;
         // Handle shortcuts before TextField consumes Return.
         var e=Event.current;
