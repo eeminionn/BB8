@@ -7,14 +7,12 @@ os.environ['TOKENIZERS_PARALLELISM']='false'
 import json,io,time,secrets,logging,threading,base64,re,unicodedata
 from http.server import ThreadingHTTPServer,BaseHTTPRequestHandler
 from concurrent.futures import ThreadPoolExecutor
-import numpy as np
 import soundfile as sf
 import mlx.core as mx
 import mlx_whisper
 from mlx_lm import load,generate
 from mlx_lm.sample_utils import make_sampler
-from scipy.signal import resample_poly
-from math import gcd
+from audio_input import prepare_audio
 
 LOCAL=BASE/'.local-voice'; LOCAL.mkdir(exist_ok=True)
 TOKEN_PATH=LOCAL/'token'
@@ -75,12 +73,7 @@ def classify(text,history):
 
 def process_audio(blob,history):
  audio,sr=sf.read(io.BytesIO(blob),dtype='float32',always_2d=True)
- audio=audio.mean(axis=1)
- if len(audio)>sr*16:raise ValueError('Máximo 15 segundos por intervención.')
- if len(audio)<sr*.3 or float(np.sqrt(np.mean(audio**2)))<.003:
-  raise ValueError('No se detectó voz. Acércate al micrófono y vuelve a hablar.')
- if sr!=16000:
-  g=gcd(sr,16000);audio=resample_poly(audio,16000//g,sr//g).astype(np.float32)
+ audio=prepare_audio(audio,sr)
  result=mlx_whisper.transcribe(audio,path_or_hf_repo=str(LOCAL/'models/stt'),language='es',fp16=True,verbose=False,condition_on_previous_text=False,temperature=0)
  segments=[s for s in result.get('segments',[]) if s.get('no_speech_prob',0)<.65 and s.get('avg_logprob',0)>-1.1]
  text=' '.join(s['text'].strip() for s in segments).strip()

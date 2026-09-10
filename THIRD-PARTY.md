@@ -29,3 +29,7 @@ El contorno continental del globo terrestre usa [Natural Earth, 1:110m land](htt
 Anton y Rajdhani, distribuidas por [Google Fonts](https://github.com/google/fonts), bajo SIL Open Font License 1.1. Se incluyen las licencias originales en `Assets/Resources/Fonts/Anton-OFL.txt` y `Rajdhani-OFL.txt`.
 
 Fuentes: [Anton](https://github.com/google/fonts/tree/main/ofl/anton) y [Rajdhani](https://github.com/google/fonts/tree/main/ofl/rajdhani). El fondo estelar, los globos estilizados del selector y la geometría del Distrito Central se generan mediante código del proyecto. Khepra es un nombre ficticio creado para este prototipo, no un planeta presentado como canon de Star Wars.
+
+## Mandos de Quest 2
+
+Modelos `oculus-touch-v3` del proyecto [WebXR Input Profiles, immersive-web](https://github.com/immersive-web/webxr-input-profiles/tree/main/packages/assets/profiles/oculus-touch-v3). Licencia MIT, Copyright (c) 2019 Amazon.com, Inc. or its affiliates, incluida en `Assets/Resources/QuestControllers/LICENSE.md`. Conversión de GLB a FBX con Blender, texturas extraídas, sombreado adaptado a Unity/OpenXR y animaciones/guías de botones añadidas para este prototipo.

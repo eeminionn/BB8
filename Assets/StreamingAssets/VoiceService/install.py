@@ -14,4 +14,5 @@ if not (support/'.local-voice').exists():
  local.symlink_to(support/'.local-voice',target_is_directory=True)
 (support/'VoiceService').mkdir(exist_ok=True)
 shutil.copy2(source/'service.py',support/'VoiceService/service.py')
+shutil.copy2(source/'audio_input.py',support/'VoiceService/audio_input.py')
 print('Servicio instalado en',support)

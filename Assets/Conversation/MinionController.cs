@@ -27,7 +27,7 @@ public sealed class MinionController : MonoBehaviour
         }
     }
     void Update(){
-        if(QuestInput.Active){Step(Controlled?QuestInput.Movement:Vector2.zero,Controlled&&QuestInput.JumpPressed,Time.deltaTime,true);return;}
+        if(QuestInput.Active){Step(Controlled?QuestInput.Travel:Vector2.zero,Controlled&&QuestInput.JumpPressed,Time.deltaTime,true);return;}
         var input=Controlled?Vector2.ClampMagnitude(new Vector2(Input.GetAxisRaw("Horizontal"),Input.GetAxisRaw("Vertical")),1):Vector2.zero;
         if(Controlled&&Input.GetKeyDown(KeyCode.H))Wave();
         Drive(input,Controlled&&Input.GetButtonDown("Jump"),Time.deltaTime);

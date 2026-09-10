@@ -1,0 +1,18 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>BB-8 · Vista del Quest</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080e17;color:#ffdd8c;font:15px system-ui,sans-serif;min-height:100vh;display:grid;grid-template-rows:auto 1fr auto}
+header,footer{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid #766342}header strong{font-size:23px;letter-spacing:3px}header span,footer{font-size:12px;color:#a9bdcf;letter-spacing:1px}
+main{position:relative;display:grid;place-items:center;min-height:0}img{height:calc(100vh - 126px);max-width:100%;object-fit:contain;display:none}p{position:absolute;padding:24px;text-align:center;background:#080e17dd;line-height:1.7;color:#c6d1dc}footer{border:0;border-top:1px solid #243d50}
+</style><header><strong>BB-8</strong><span>VISTA DEL QUEST · USB</span></header><main><img alt="Cámara del juego en el Quest"><p id="status">Conecta el USB y ponte el visor.<br>Esperando imagen del juego…</p></main><footer><span>Solo imagen · Sin audio · Sin grabación</span><span id="live">EN ESPERA</span></footer>
+<script>
+const image=document.querySelector('img'),status=document.querySelector('#status'),live=document.querySelector('#live');let previous;
+async function tick(){
+ try{
+  if(!document.hidden){const response=await fetch('/frame',{cache:'no-store'});
+   if(response.status===200){const url=URL.createObjectURL(await response.blob());image.src=url;image.style.display='block';status.hidden=true;live.textContent='EN DIRECTO';if(previous)URL.revokeObjectURL(previous);previous=url;}
+   else{status.hidden=false;live.textContent='EN ESPERA';}
+  }
+ }catch{status.hidden=false;live.textContent='DESCONECTADO';}
+ setTimeout(tick,100);
+}tick();
+</script></html>

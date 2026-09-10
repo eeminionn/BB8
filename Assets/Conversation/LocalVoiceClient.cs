@@ -14,6 +14,7 @@ public sealed class LocalVoiceClient : MonoBehaviour
     public bool Ready { get; private set; }
     public bool Busy { get; private set; }
     public bool Recording { get; private set; }
+    public float MicrophoneLevel { get; private set; }
     public string Status { get; private set; } = "Preparando voz local…";
     public string Transcript { get; private set; } = "";
     public VoiceResult LastResult { get; private set; }
@@ -22,7 +23,8 @@ public sealed class LocalVoiceClient : MonoBehaviour
     const string Url="http://127.0.0.1:8768";
     string project,token,device;
     AudioClip recording;
-    float recordStart,oldVolume=1;
+    float recordStart,oldVolume=1,releaseDeadline=-1;
+    readonly float[] meterSamples=new float[2048];
     System.Diagnostics.Process service;
     readonly List<string> history=new List<string>();
     public string TalkHint => QuestInput.Active?"Mantén el gatillo derecho para hablar":"Mantén E para hablar con BB-8";
@@ -100,14 +102,35 @@ public sealed class LocalVoiceClient : MonoBehaviour
         if(devices.Length==0){Status="No se detectó un micrófono.";Busy=false;yield break;}
         if(!QuestInput.Talking){Status=TalkHint;Busy=false;yield break;}
         device=devices[Mathf.Clamp(MicrophoneIndex,0,devices.Length-1)];
-        recording=Microphone.Start(device,false,15,16000);
+        Microphone.GetDeviceCaps(device,out int minimum,out int maximum);
+        int rate=QuestInput.Active?48000:16000;
+        if(maximum>0)rate=Mathf.Clamp(rate,Mathf.Max(8000,minimum),maximum);
+        Status="Preparando micrófono…";
+        recording=Microphone.Start(device,false,15,rate);
         if(!recording){Status="No se pudo abrir el micrófono.";Busy=false;yield break;}
         oldVolume=AudioListener.volume;AudioListener.volume=0;
-        recordStart=Time.realtimeSinceStartup;Recording=true;Busy=false;Status=QuestInput.Active?"Te escucho… suelta el gatillo para responder":"Te escucho… suelta E para responder";
+        recordStart=Time.realtimeSinceStartup;releaseDeadline=-1;MicrophoneLevel=0;Recording=true;
+        // Do not announce readiness before Android actually starts delivering samples.
+        while(Recording&&Microphone.GetPosition(device)<=0&&Time.realtimeSinceStartup-recordStart<3)yield return null;
+        if(!Recording){Busy=false;yield break;}
+        if(Microphone.GetPosition(device)<=0){CancelRecording();Status="El micrófono no está entregando audio. Vuelve a intentarlo.";yield break;}
+        Busy=false;Status=QuestInput.Active?"Te escucho… suelta el gatillo para responder":"Te escucho… suelta E para responder";
     }
-    void Update(){if(Recording && (!QuestInput.Talking||Time.realtimeSinceStartup-recordStart>14.7f)) EndRecording();}
+    void Update(){
+        if(!Recording||Busy)return;
+        int position=Microphone.GetPosition(device);
+        if(position>meterSamples.Length){
+            recording.GetData(meterSamples,position-meterSamples.Length);
+            float sum=0;foreach(float sample in meterSamples)sum+=sample*sample;
+            float rms=Mathf.Sqrt(sum/meterSamples.Length);
+            MicrophoneLevel=Mathf.Lerp(MicrophoneLevel,Mathf.Clamp01((20*Mathf.Log10(Mathf.Max(rms,.00001f))+60)/48),.4f);
+        }
+        if(QuestInput.Talking)releaseDeadline=-1;
+        else if(releaseDeadline<0)releaseDeadline=Time.realtimeSinceStartup+.12f;
+        if((releaseDeadline>=0&&Time.realtimeSinceStartup>=releaseDeadline)||Time.realtimeSinceStartup-recordStart>14.7f)EndRecording();
+    }
     void OnApplicationFocus(bool focused){if(!focused && Recording) CancelRecording();}
-    void CancelRecording(){if(!Recording)return;Microphone.End(device);Recording=false;AudioListener.volume=oldVolume;if(recording)Destroy(recording);Status="Grabación cancelada";}
+    void CancelRecording(){if(!Recording)return;Microphone.End(device);Recording=false;Busy=false;MicrophoneLevel=0;AudioListener.volume=oldVolume;if(recording)Destroy(recording);Status="Grabación cancelada";}
     void EndRecording(){
         int count=Microphone.GetPosition(device);Microphone.End(device);Recording=false;AudioListener.volume=oldVolume;
         if(count<recording.frequency*.3f){Destroy(recording);Status="Habla durante al menos un segundo. "+TalkHint;return;}
